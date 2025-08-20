@@ -1,0 +1,18 @@
+{
+  "buildCommand": "cd ../.. && turbo run build --filter=api",
+  "outputDirectory": "dist",
+  "installCommand": "cd ../.. && pnpm install",
+  "framework": null,
+  "functions": {
+    "dist/index.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/dist/index.js"
+    }
+  ],
+  "ignoreCommand": "npx turbo-ignore --fallback=HEAD^1"
+}

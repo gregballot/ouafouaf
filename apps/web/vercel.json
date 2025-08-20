@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd ../.. && turbo run build --filter=web",
+  "outputDirectory": "dist",
+  "installCommand": "cd ../.. && pnpm install",
+  "framework": "vite",
+  "ignoreCommand": "npx turbo-ignore --fallback=HEAD^1"
+}
