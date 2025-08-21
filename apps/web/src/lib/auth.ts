@@ -44,8 +44,9 @@ export function getStoredAuth(): AuthState {
 }
 
 export function setStoredAuth(user: UserType, token: string, expires_at: string): void {
+  const authData = { user, token, expires_at };
+  
   try {
-    const authData = { user, token, expires_at };
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
   } catch (error) {
     console.error('Failed to store auth data:', error);

@@ -53,11 +53,12 @@ class ApiClient {
 
       if (!response.ok) {
         const error = data as AuthErrorResponseType;
+        const errorDetails = error?.error && 'details' in error.error ? error.error.details : undefined;
         throw new ApiError(
           error?.error?.message || 'Request failed',
           response.status,
           error?.error?.code || 'REQUEST_FAILED',
-          'details' in (error?.error || {}) ? error.error.details : undefined
+          errorDetails
         );
       }
 
