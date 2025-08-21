@@ -84,6 +84,41 @@ pnpm db:down
 - **Essential Only**: Every dependency should solve a real problem. Question whether a library is truly needed before adding it.
 - **Maintainability**: Simple code is easier to maintain, debug, and understand. Favor clarity over cleverness.
 
+## Security Principles
+
+- **Environment Variables**: Never include fallback secrets in code. Always require environment variables for sensitive data and fail fast if missing.
+- **Multi-Layer Validation**: Validate inputs at client, API, and database boundaries. Never trust external data.
+- **Database Security**: Use parameterized queries exclusively. Never use string concatenation for SQL queries.
+- **Defensive Programming**: Always check for null/undefined before using critical data. Assume external systems can fail or return unexpected data.
+
+## Error Handling Standards
+
+- **Design for Failure**: Consider error scenarios from the start, not as an afterthought.
+- **Graceful Degradation**: Provide fallbacks for external dependencies (storage, network, APIs).
+- **Explicit Error Handling**: Handle network failures, malformed responses, and storage errors explicitly.
+- **User Experience**: Never let errors crash the application. Provide meaningful feedback and recovery options.
+
+## Type Safety Guidelines
+
+- **Cross-Boundary Consistency**: Maintain type consistency between frontend, backend, and database.
+- **Runtime Validation**: Validate that runtime data matches expected types, especially from external sources.
+- **Shared Schemas**: Use shared type definitions to prevent contract drift between systems.
+- **Safe TypeScript**: Avoid non-null assertions (`!`) without explicit null checks. Prefer optional chaining and nullish coalescing.
+
+## Code Quality Workflow
+
+- **Agent Reviews**: Use code-quality-reviewer and bug-hunter agents for all significant changes.
+- **End-to-End Testing**: Always test the complete user flow, not just individual functions.
+- **Configuration Validation**: Verify all required environment variables and settings on startup.
+- **Error Scenario Testing**: Test failure cases, edge cases, and invalid inputs alongside happy paths.
+
+## Architecture Philosophy
+
+- **Separation of Concerns**: Keep authentication, business logic, and UI state clearly separated.
+- **Component Reusability**: Design components for composition and reuse across different contexts.
+- **Centralized Configuration**: Make configuration explicit and centralized rather than scattered.
+- **Shared Validation**: Use shared schemas and validation logic to prevent inconsistencies between layers.
+
 ## Core Files & Architecture
 
 - `turbo.json` - Turborepo task configuration and caching
@@ -115,17 +150,26 @@ pnpm build
 # Install dependencies
 pnpm install
 
+# Set up environment variables (copy and modify)
+cp apps/api/.env.example apps/api/.env.local
+cp apps/web/.env.example apps/web/.env.local
+
 # Start PostgreSQL database
-pnpm db:up
+docker-compose up -d
 
 # Run development servers (all apps in parallel)
 pnpm dev
 
 # Access the applications:
 # - Frontend: http://localhost:3000
-# - API: http://localhost:3001
-# - API Documentation: http://localhost:3001/docs
+# - API: http://localhost:4000
+# - API Documentation: http://localhost:4000/docs
 ```
+
+**Required Environment Variables:**
+- `JWT_SECRET` - Secure random string for JWT signing (API)
+- `DATABASE_URL` - PostgreSQL connection string (API)
+- `VITE_API_URL` - API endpoint URL (Web, leave empty for development proxy)
 
 ## Production Deployment
 
@@ -137,7 +181,9 @@ pnpm dev
 
 **Environment Variables:**
 - `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET` - Secure random string for JWT signing (**REQUIRED**)
 - `NODE_ENV` - Set to 'production' for production builds
+- `VITE_API_URL` - Your deployed API URL (for frontend)
 
 ## Repository Notes
 

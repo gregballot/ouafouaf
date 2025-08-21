@@ -1,17 +1,17 @@
+import 'dotenv/config'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 import { createPool } from '@repo/database'
+import { authRoutes } from './routes/auth'
 
 const fastify = Fastify({
   logger: {
-    level: 'info',
-    transport: process.env.NODE_ENV === 'development' ? {
-      target: 'pino-pretty'
-    } : undefined
+    level: 'info'
   }
-})
+}).withTypeProvider<TypeBoxTypeProvider>()
 
 // Register plugins
 await fastify.register(cors, {
@@ -27,7 +27,7 @@ await fastify.register(swagger, {
       description: 'API for Ouafouaf application',
       version: '1.0.0'
     },
-    host: 'localhost:3001',
+    host: 'localhost:4000',
     schemes: ['http'],
     consumes: ['application/json'],
     produces: ['application/json']
@@ -102,10 +102,13 @@ fastify.get('/api/hello', {
   return { message: 'Hello from Ouafouaf API!' }
 })
 
+// Register auth routes
+await fastify.register(authRoutes, { prefix: '/api/auth' })
+
 // Start server
 const start = async () => {
   try {
-    const port = Number(process.env.PORT) || 3001
+    const port = Number(process.env.PORT) || 4000
     const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
     
     await fastify.listen({ port, host })

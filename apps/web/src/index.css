@@ -14,23 +14,51 @@ body {
 }
 
 .app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   min-height: 100vh;
   padding: 2rem;
 }
 
-.app h1 {
+.app__header {
+  text-align: center;
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app__title {
   font-size: 3rem;
+  color: #333;
+  margin: 0;
+}
+
+.app__subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin: 0;
+}
+
+.app__content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.dashboard {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.dashboard h2 {
   margin-bottom: 1rem;
   color: #333;
 }
 
-.app p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
+.dashboard p {
   color: #666;
 }
 

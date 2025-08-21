@@ -1,20 +1,35 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, ButtonHTMLAttributes } from 'react';
 
-export interface ButtonProps {
+export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   children: ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
   variant?: 'primary' | 'secondary';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
 }
 
-export function Button({ children, onClick, disabled = false, variant = 'primary' }: ButtonProps) {
+export function Button({ 
+  children, 
+  variant = 'primary', 
+  size = 'md',
+  loading = false,
+  disabled = false,
+  className = '',
+  ...props 
+}: ButtonProps) {
+  const isDisabled = disabled || loading;
+
   return (
     <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`btn btn--${variant}`}
+      disabled={isDisabled}
+      className={`btn btn--${variant} btn--${size} ${loading ? 'btn--loading' : ''} ${className}`}
+      {...props}
     >
-      {children}
+      {loading ? (
+        <span className="btn__spinner" aria-hidden="true">⏳</span>
+      ) : null}
+      <span className={loading ? 'btn__text btn__text--loading' : 'btn__text'}>
+        {children}
+      </span>
     </button>
   );
 }
