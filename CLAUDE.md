@@ -32,14 +32,14 @@ Full-stack TypeScript monorepo using Turborepo with:
 ```
 ouafouaf/
 ├── apps/
-│   ├── web/                  # Vite + React + SWC frontend
-│   └── api/                  # Fastify backend API
+│   ├── web/                  # Frontend application
+│   └── api/                  # Backend API
 ├── packages/
-│   ├── ui/                   # Shared React components
+│   ├── ui/                   # Shared UI components
 │   ├── database/             # Database utilities & types
 │   ├── eslint-config/        # Shared ESLint configuration
 │   └── typescript-config/    # Shared TypeScript configurations
-├── docker-compose.yml        # PostgreSQL for local development
+├── docker-compose.yml        # Local development database
 ├── turbo.json               # Turborepo configuration
 └── pnpm-workspace.yaml      # Workspace definition
 ```
@@ -114,7 +114,7 @@ pnpm db:down
 
 ## Architecture Philosophy
 
-- **Separation of Concerns**: Keep authentication, business logic, and UI state clearly separated.
+- **Separation of Concerns**: Keep business logic, UI state, and external integrations clearly separated.
 - **Component Reusability**: Design components for composition and reuse across different contexts.
 - **Centralized Configuration**: Make configuration explicit and centralized rather than scattered.
 - **Shared Validation**: Use shared schemas and validation logic to prevent inconsistencies between layers.
@@ -142,17 +142,12 @@ pnpm lint
 pnpm build
 ```
 
-*Unit testing framework to be added in future iterations*
 
 ## Local Development Setup
 
 ```bash
 # Install dependencies
 pnpm install
-
-# Set up environment variables (copy and modify)
-cp apps/api/.env.example apps/api/.env.local
-cp apps/web/.env.example apps/web/.env.local
 
 # Start PostgreSQL database
 docker-compose up -d
@@ -166,10 +161,6 @@ pnpm dev
 # - API Documentation: http://localhost:4000/docs
 ```
 
-**Required Environment Variables:**
-- `JWT_SECRET` - Secure random string for JWT signing (API)
-- `DATABASE_URL` - PostgreSQL connection string (API)
-- `VITE_API_URL` - API endpoint URL (Web, leave empty for development proxy)
 
 ## Production Deployment
 
