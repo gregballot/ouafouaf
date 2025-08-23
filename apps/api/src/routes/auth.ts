@@ -6,13 +6,12 @@ import {
   type SignupRequestType,
   type LoginRequestType 
 } from '@repo/api-schemas';
-import { 
-  createUser, 
-  findUserByEmail, 
-  updateLastLogin,
-  type DatabaseUser
-} from '@repo/database';
-import { hashPassword, verifyPassword, generateToken, getTokenExpiration } from '../lib/auth';
+import { UserRepository } from '../domain/User/UserRepository';
+import { EventRepository } from '../domain/DomainEvent/EventRepository';
+import { registerUser } from '../domain/User/features/register-user';
+import { authenticateUser } from '../domain/User/features/authenticate-user';
+import { generateToken, getTokenExpiration } from '../lib/auth';
+import '../shared/types'; // Import Fastify interface extensions
 
 export async function authRoutes(fastify: FastifyInstance) {
   const server = fastify.withTypeProvider<TypeBoxTypeProvider>();
@@ -23,50 +22,51 @@ export async function authRoutes(fastify: FastifyInstance) {
   }, async (request, reply) => {
     const { email, password } = request.body as SignupRequestType;
 
-    try {
-      // Check if user already exists
-      const existingUser = await findUserByEmail(email);
-      if (existingUser) {
-        return reply.status(409).send({
-          error: {
-            message: 'User already exists',
-            code: 'USER_EXISTS'
-          }
-        });
-      }
+    // Instantiate dependencies with transaction
+    const userRepository = new UserRepository(request.transaction);
+    const eventRepository = new EventRepository(request.transaction);
 
-      // Hash password and create user
-      const password_hash = await hashPassword(password);
-      const user = await createUser({ email, password_hash });
+    // Execute register user feature
+    const result = await registerUser(
+      { email, password },
+      { userRepository, eventRepository }
+    );
 
-      // Generate token
-      const token = generateToken(user);
-      const expires_at = getTokenExpiration();
-
-      // Update last login
-      await updateLastLogin(user.id);
-
-      return reply.status(201).send({
-        user: {
-          id: user.id,
-          email: user.email,
-          created_at: user.created_at,
-          updated_at: user.updated_at,
-          last_login: user.last_login
-        },
-        token,
-        expires_at
-      });
-
-    } catch (error) {
-      fastify.log.error(error);
-      return reply.status(400).send({
+    // Handle result
+    if (result.isFailure()) {
+      const errorCode = result.error === 'User already exists' ? 409 : 400;
+      const code = result.error === 'User already exists' ? 'USER_EXISTS' : 'SIGNUP_ERROR';
+      
+      return reply.status(errorCode).send({
         error: {
-          message: 'Failed to create user',
-          code: 'SIGNUP_ERROR'
+          message: result.error,
+          code
         }
       });
     }
+
+    // Generate JWT token
+    const userState = result.value.user.getInternalState();
+    const token = generateToken({
+      id: userState.id,
+      email: userState.email,
+      created_at: userState.createdAt.toISOString(),
+      updated_at: userState.updatedAt.toISOString(),
+      last_login: userState.lastLogin?.toISOString()
+    });
+    const expires_at = getTokenExpiration();
+
+    return reply.status(201).send({
+      user: {
+        id: userState.id,
+        email: userState.email,
+        created_at: userState.createdAt.toISOString(),
+        updated_at: userState.updatedAt.toISOString(),
+        last_login: userState.lastLogin?.toISOString()
+      },
+      token,
+      expires_at
+    });
   });
 
   // Login endpoint
@@ -75,66 +75,47 @@ export async function authRoutes(fastify: FastifyInstance) {
   }, async (request, reply) => {
     const { email, password } = request.body as LoginRequestType;
 
-    try {
-      // Find user by email
-      const user = await findUserByEmail(email);
-      if (!user) {
-        return reply.status(401).send({
-          error: {
-            message: 'Invalid credentials',
-            code: 'INVALID_CREDENTIALS'
-          }
-        });
-      }
+    // Instantiate dependencies with transaction
+    const userRepository = new UserRepository(request.transaction);
+    const eventRepository = new EventRepository(request.transaction);
 
-      // Verify password
-      if (!user.password_hash) {
-        return reply.status(401).send({
-          error: {
-            message: 'Invalid credentials',
-            code: 'INVALID_CREDENTIALS'
-          }
-        });
-      }
+    // Execute authenticate user feature
+    const result = await authenticateUser(
+      { email, password },
+      { userRepository, eventRepository }
+    );
 
-      const isValid = await verifyPassword(password, user.password_hash);
-      if (!isValid) {
-        return reply.status(401).send({
-          error: {
-            message: 'Invalid credentials',
-            code: 'INVALID_CREDENTIALS'
-          }
-        });
-      }
-
-      // Generate token
-      const token = generateToken(user);
-      const expires_at = getTokenExpiration();
-
-      // Update last login and get the actual timestamp
-      const loginTime = new Date().toISOString();
-      await updateLastLogin(user.id);
-
-      return reply.status(200).send({
-        user: {
-          id: user.id,
-          email: user.email,
-          created_at: user.created_at,
-          updated_at: user.updated_at,
-          last_login: loginTime
-        },
-        token,
-        expires_at
-      });
-
-    } catch (error) {
-      fastify.log.error(error);
-      return reply.status(400).send({
+    // Handle result
+    if (result.isFailure()) {
+      return reply.status(401).send({
         error: {
-          message: 'Login failed',
-          code: 'LOGIN_ERROR'
+          message: 'Invalid credentials',
+          code: 'INVALID_CREDENTIALS'
         }
       });
     }
+
+    // Generate JWT token
+    const userState = result.value.user.getInternalState();
+    const token = generateToken({
+      id: userState.id,
+      email: userState.email,
+      created_at: userState.createdAt.toISOString(),
+      updated_at: userState.updatedAt.toISOString(),
+      last_login: userState.lastLogin?.toISOString()
+    });
+    const expires_at = getTokenExpiration();
+
+    return reply.status(200).send({
+      user: {
+        id: userState.id,
+        email: userState.email,
+        created_at: userState.createdAt.toISOString(),
+        updated_at: userState.updatedAt.toISOString(),
+        last_login: userState.lastLogin?.toISOString()
+      },
+      token,
+      expires_at
+    });
   });
 }

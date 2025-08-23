@@ -114,10 +114,15 @@ pnpm db:down
 
 ## Architecture Philosophy
 
-- **Separation of Concerns**: Keep business logic, UI state, and external integrations clearly separated.
-- **Component Reusability**: Design components for composition and reuse across different contexts.
-- **Centralized Configuration**: Make configuration explicit and centralized rather than scattered.
-- **Shared Validation**: Use shared schemas and validation logic to prevent inconsistencies between layers.
+- **Domain-Driven Design**: Follow the architectural guidelines in `docs/architecture.md` for all API development
+- **Subdomain Organization**: Organize code by business domains rather than technical layers
+- **Transaction-Per-Request**: Use database transactions consistently with automatic commit/rollback
+- **Separation of Concerns**: Keep business logic, UI state, and external integrations clearly separated
+- **Component Reusability**: Design components for composition and reuse across different contexts
+- **Centralized Configuration**: Make configuration explicit and centralized rather than scattered
+- **Shared Validation**: Use shared schemas and validation logic to prevent inconsistencies between layers
+
+**IMPORTANT**: For all API development, follow the DDD + Hexagonal Architecture patterns documented in `docs/architecture.md`. This includes entity design, repository patterns, feature functions, and testing approaches.
 
 ## Core Files & Architecture
 

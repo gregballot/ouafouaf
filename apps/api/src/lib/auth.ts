@@ -1,18 +1,8 @@
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import type { UserType } from '@repo/api-schemas';
 import { env } from '../config/env'
 
-const SALT_ROUNDS = 12;
 const JWT_EXPIRES_IN = '7d';
-
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, SALT_ROUNDS);
-}
-
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
-}
 
 export function generateToken(user: UserType): string {
   return jwt.sign(
