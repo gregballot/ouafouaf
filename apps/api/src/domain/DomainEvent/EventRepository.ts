@@ -1,46 +1,43 @@
-import { Result } from '../../shared/Result';
+import { Transaction } from 'kysely';
+import { Database } from '../../shared/database-types';
 import { AllDomainEvents } from './index';
-
-// Simple Transaction interface
-interface Transaction {
-  query(sql: string, params: any[]): Promise<any>;
-}
+import { DatabaseError } from '../../shared/errors';
 
 export class EventRepository {
-  constructor(private transaction: Transaction) {}
+  // Always work within a transaction
+  constructor(private trx: Transaction<Database>) {}
 
-  async publish(event: AllDomainEvents): Promise<Result<void>> {
+  async publish(event: AllDomainEvents): Promise<void> {
     try {
-      await this.transaction.query(`
-        INSERT INTO domain_events (id, event_name, event_data, occurred_at)
-        VALUES ($1, $2, $3, $4)
-      `, [
-        crypto.randomUUID(),
-        event.eventName,
-        JSON.stringify(event),
-        event.occurredAt
-      ]);
-
-      return Result.success(undefined);
+      await this.trx
+        .insertInto('domain_events')
+        .values({
+          id: crypto.randomUUID(),
+          aggregate_id: event.aggregateId,
+          event_name: event.eventName,
+          event_data: JSON.stringify(event),
+          occurred_at: event.occurredAt
+        })
+        .execute();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      return Result.fail(`Failed to publish event: ${message}`);
+      throw new DatabaseError(`Failed to publish event: ${message}`, error);
     }
   }
 
   async findByAggregateId(aggregateId: string): Promise<AllDomainEvents[]> {
     try {
-      const result = await this.transaction.query(`
-        SELECT event_name, event_data, occurred_at
-        FROM domain_events
-        WHERE event_data::jsonb @> $1
-        ORDER BY occurred_at ASC
-      `, [JSON.stringify({ userId: aggregateId })]);
+      const rows = await this.trx
+        .selectFrom('domain_events')
+        .select(['event_name', 'event_data', 'occurred_at'])
+        .where('aggregate_id', '=', aggregateId)
+        .orderBy('occurred_at', 'asc')
+        .execute();
 
-      return result.rows.map((row: any) => JSON.parse(row.event_data));
+      return rows.map(row => JSON.parse(row.event_data));
     } catch (error) {
-      console.error('Error finding events by aggregate ID:', error);
-      return [];
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new DatabaseError(`Failed to find events by aggregate ID: ${message}`, error);
     }
   }
 }

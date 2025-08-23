@@ -1,15 +1,9 @@
-// Transaction interface for our domain
-export interface Transaction {
-  query(sql: string, params?: any[]): Promise<any>;
-  commit(): Promise<void>;
-  rollback(): Promise<void>;
-  release(): void;
-  isCompleted: boolean;
-}
+import { Transaction as KyselyTransaction } from 'kysely';
+import { Database } from './database-types';
 
 // Extend Fastify request interface
 declare module 'fastify' {
   interface FastifyRequest {
-    transaction: Transaction;
+    transaction: KyselyTransaction<Database>;
   }
 }

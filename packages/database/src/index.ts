@@ -1,9 +1,9 @@
-export { createPool, getConnection } from './connection';
+export { createPool, getConnection, getPool } from './connection';
 export type { DatabaseConfig } from './types';
-export { 
-  createUser, 
-  findUserByEmail, 
-  findUserByEmailAndPassword, 
+export {
+  createUser,
+  findUserByEmail,
+  findUserByEmailAndPassword,
   updateLastLogin,
   type CreateUserParams,
   type AuthUserParams,

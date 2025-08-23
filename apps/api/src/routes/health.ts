@@ -16,7 +16,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
       }
     }
   }, async () => {
-    return { 
+    return {
       status: 'ok',
       timestamp: new Date().toISOString()
     }

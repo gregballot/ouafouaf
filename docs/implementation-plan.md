@@ -57,7 +57,7 @@ Create `src/domain/User/UserRepository.ts`:
 #### 2.3 User Events
 Create `src/domain/User/event.ts`:
 - UserRegistered domain event
-- UserLoggedIn domain event  
+- UserLoggedIn domain event
 - UserEvents union type
 
 #### 2.4 User Builder (for tests)
@@ -211,7 +211,7 @@ Create `src/routes/auth.test.ts`:
 - ✅ Database transactions work correctly
 - ✅ Domain events are published successfully
 
-### Quality Requirements  
+### Quality Requirements
 - ✅ Entity unit tests pass (business rule validation)
 - ✅ Feature integration tests pass (real database)
 - ✅ Route tests pass (API contract compliance)
@@ -226,7 +226,7 @@ Create `src/routes/auth.test.ts`:
 ## Timeline Estimates
 
 - **Phase 1 (Foundation)**: 2-3 hours
-- **Phase 2 (User Domain)**: 4-5 hours  
+- **Phase 2 (User Domain)**: 4-5 hours
 - **Phase 3 (Events)**: 2-3 hours
 - **Phase 4 (Features)**: 3-4 hours
 - **Phase 5 (Testing)**: 4-6 hours

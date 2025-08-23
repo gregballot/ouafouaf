@@ -1,21 +1,24 @@
 import bcrypt from 'bcrypt';
-import { Result } from '../../shared/Result';
+import {
+  InvalidEmailError,
+  InvalidPasswordError
+} from '../../shared/errors';
 
-// Inline Value Objects
+// Inline Value Objects - now throw errors instead of returning Results
 export class Email {
   private constructor(private readonly value: string) {}
 
-  static create(value: string): Result<Email> {
+  static create(value: string): Email {
     if (!value || typeof value !== 'string') {
-      return Result.fail('Email is required');
+      throw new InvalidEmailError();
     }
-    
+
     const trimmed = value.trim().toLowerCase();
     if (!this.isValidEmail(trimmed)) {
-      return Result.fail('Invalid email format');
+      throw new InvalidEmailError();
     }
-    
-    return Result.success(new Email(trimmed));
+
+    return new Email(trimmed);
   }
 
   toString(): string {
@@ -35,33 +38,42 @@ export class Email {
 export class Password {
   private constructor(private readonly hash: string) {}
 
-  static async create(plaintext: string): Promise<Result<Password>> {
+  static async create(plaintext: string): Promise<Password> {
     if (!plaintext || typeof plaintext !== 'string') {
-      return Result.fail('Password is required');
+      throw new InvalidPasswordError('Password is required');
     }
 
     if (plaintext.length < 8) {
-      return Result.fail('Password must be at least 8 characters long');
+      throw new InvalidPasswordError('Password must be at least 8 characters long');
     }
 
     if (plaintext.length > 100) {
-      return Result.fail('Password must be less than 100 characters');
+      throw new InvalidPasswordError('Password must be less than 100 characters');
     }
 
     const hash = await bcrypt.hash(plaintext, 12);
-    return Result.success(new Password(hash));
+    return new Password(hash);
   }
 
-  static fromHash(hash: string): Result<Password> {
+  static fromHash(hash: string): Password {
     if (!hash || typeof hash !== 'string') {
-      return Result.fail('Password hash is required');
+      throw new InvalidPasswordError('Password hash is required');
     }
-    return Result.success(new Password(hash));
+    return new Password(hash);
   }
 
   async verify(plaintext: string): Promise<boolean> {
-    if (!plaintext) return false;
-    return bcrypt.compare(plaintext, this.hash);
+    if (!plaintext || typeof plaintext !== 'string') {
+      return false;
+    }
+
+    try {
+      return await bcrypt.compare(plaintext, this.hash);
+    } catch (error) {
+      // If bcrypt comparison fails due to corrupted hash or other issues,
+      // treat as invalid password rather than throwing
+      return false;
+    }
   }
 
   getHash(): string {
@@ -69,81 +81,94 @@ export class Password {
   }
 }
 
-// Main User Entity
-export class User {
-  private constructor(
-    public readonly id: string,
-    public readonly email: Email,
-    private readonly password: Password,
-    public readonly createdAt: Date,
-    public readonly updatedAt: Date,
-    public readonly lastLogin: Date | null
-  ) {}
+// User entity constructor parameters - typed object
+export interface UserConstructorParams {
+  id: string;
+  email: Email;
+  password: Password;
+  createdAt: Date;
+  updatedAt: Date;
+  lastLogin: Date | null;
+}
 
-  static async create(email: Email, password: Password): Promise<Result<User>> {
-    // Domain validation can go here
-    return Result.success(new User(
-      crypto.randomUUID(),
+// User entity creation parameters - typed object
+export interface CreateUserParams {
+  email: Email;
+  password: Password;
+}
+
+// Persistence data interface
+export interface UserPersistenceData {
+  id: string;
+  email: string;
+  passwordHash: string;
+  createdAt: Date;
+  updatedAt: Date;
+  lastLogin: Date | null;
+}
+
+// User entity
+export class User {
+  private constructor(private readonly params: UserConstructorParams) {}
+
+  // Factory method for creating new users
+  static async create(params: CreateUserParams): Promise<User> {
+    const now = new Date();
+    return new User({
+      id: crypto.randomUUID(),
+      email: params.email,
+      password: params.password,
+      createdAt: now,
+      updatedAt: now,
+      lastLogin: null
+    });
+  }
+
+  // Factory method for reconstructing from persistence
+  static fromPersistence(data: UserPersistenceData): User {
+    const email = Email.create(data.email);
+    const password = Password.fromHash(data.passwordHash);
+
+    return new User({
+      id: data.id,
       email,
       password,
-      new Date(),
-      new Date(),
-      null
-    ));
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      lastLogin: data.lastLogin
+    });
   }
 
-  static fromPersistence(data: {
-    id: string;
-    email: string;
-    passwordHash: string;
-    createdAt: Date;
-    updatedAt: Date;
-    lastLogin: Date | null;
-  }): Result<User> {
-    const emailResult = Email.create(data.email);
-    if (emailResult.isFailure()) {
-      return Result.fail(`Invalid email in persistence data: ${emailResult.error}`);
-    }
+  // Getters
+  get id(): string { return this.params.id; }
+  get email(): Email { return this.params.email; }
+  get createdAt(): Date { return this.params.createdAt; }
+  get updatedAt(): Date { return this.params.updatedAt; }
+  get lastLogin(): Date | null { return this.params.lastLogin; }
 
-    const passwordResult = Password.fromHash(data.passwordHash);
-    if (passwordResult.isFailure()) {
-      return Result.fail(`Invalid password in persistence data: ${passwordResult.error}`);
-    }
-
-    return Result.success(new User(
-      data.id,
-      emailResult.value,
-      passwordResult.value,
-      data.createdAt,
-      data.updatedAt,
-      data.lastLogin
-    ));
-  }
-
+  // Business methods
   async authenticate(plaintext: string): Promise<boolean> {
-    return this.password.verify(plaintext);
+    return this.params.password.verify(plaintext);
   }
 
   updateLastLogin(): User {
-    return new User(
-      this.id,
-      this.email,
-      this.password,
-      this.createdAt,
-      new Date(), // updatedAt
-      new Date()  // lastLogin
-    );
+    const now = new Date();
+    return new User({
+      ...this.params,
+      lastLogin: now,
+      updatedAt: now
+    });
   }
 
   // For persistence - exposes internal state
-  getInternalState() {
+  getInternalState(): UserPersistenceData {
     return {
-      id: this.id,
-      email: this.email.toString(),
-      passwordHash: this.password.getHash(),
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      lastLogin: this.lastLogin
+      id: this.params.id,
+      email: this.params.email.toString(),
+      passwordHash: this.params.password.getHash(),
+      createdAt: this.params.createdAt,
+      updatedAt: this.params.updatedAt,
+      lastLogin: this.params.lastLogin
     };
   }
 }

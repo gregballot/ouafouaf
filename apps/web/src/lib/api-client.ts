@@ -1,8 +1,8 @@
-import type { 
-  SignupRequestType, 
-  LoginRequestType, 
+import type {
+  SignupRequestType,
+  LoginRequestType,
   AuthResponseType,
-  AuthErrorResponseType 
+  AuthErrorResponseType
 } from '@repo/api-schemas';
 
 export class ApiError extends Error {
@@ -26,11 +26,11 @@ class ApiClient {
   }
 
   private async request<T>(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     try {
       const response = await fetch(url, {
         headers: {
@@ -67,7 +67,7 @@ class ApiClient {
       if (networkError instanceof ApiError) {
         throw networkError;
       }
-      
+
       // Handle network errors (fetch throws for network failures)
       throw new ApiError(
         'Network error occurred',

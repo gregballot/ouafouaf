@@ -16,7 +16,7 @@ export function getStoredAuth(): AuthState {
     }
 
     const parsed = JSON.parse(stored);
-    
+
     // Check if token is expired
     if (parsed.expires_at && new Date(parsed.expires_at) <= new Date()) {
       try {
@@ -45,7 +45,7 @@ export function getStoredAuth(): AuthState {
 
 export function setStoredAuth(user: UserType, token: string, expires_at: string): void {
   const authData = { user, token, expires_at };
-  
+
   try {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
   } catch (error) {

@@ -61,20 +61,20 @@ export function useAuth() {
     user: authState.user,
     token: authState.token,
     isAuthenticated: authState.isAuthenticated,
-    
+
     // Mutations
     signup: signupMutation.mutate,
     login: loginMutation.mutate,
     logout,
-    
+
     // Loading states
     isSigningUp: signupMutation.isPending,
     isLoggingIn: loginMutation.isPending,
-    
+
     // Error states
     signupError: signupMutation.error as ApiError | null,
     loginError: loginMutation.error as ApiError | null,
-    
+
     // Reset functions
     resetSignupError: signupMutation.reset,
     resetLoginError: loginMutation.reset,

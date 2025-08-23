@@ -1,248 +1,230 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { User, Email, Password } from './User';
 
-describe('Email Value Object', () => {
-  describe('creation', () => {
-    it('should create email with valid format', () => {
-      const result = Email.create('test@example.com');
-      
-      expect(result.isSuccess()).toBe(true);
-      expect(result.value.toString()).toBe('test@example.com');
+describe('User Domain Entity - Unit Tests', () => {
+  describe('Email Value Object', () => {
+    describe('creation', () => {
+      it('should create email with valid format', () => {
+        const email = Email.create('test@example.com');
+        expect(email.toString()).toBe('test@example.com');
+      });
+
+      it('should normalize email to lowercase', () => {
+        const email = Email.create('TEST@EXAMPLE.COM');
+        expect(email.toString()).toBe('test@example.com');
+      });
+
+      it('should trim whitespace', () => {
+        const email = Email.create('  test@example.com  ');
+        expect(email.toString()).toBe('test@example.com');
+      });
     });
 
-    it('should normalize email to lowercase', () => {
-      const result = Email.create('TEST@EXAMPLE.COM');
-      
-      expect(result.isSuccess()).toBe(true);
-      expect(result.value.toString()).toBe('test@example.com');
+    describe('validation failures', () => {
+      it('should throw with invalid format', () => {
+        expect(() => Email.create('invalid-email')).toThrow('Invalid email format');
+      });
+
+      it('should throw with empty string', () => {
+        expect(() => Email.create('')).toThrow('Invalid email format');
+      });
+
+      it('should throw with null', () => {
+        expect(() => Email.create(null as any)).toThrow('Invalid email format');
+      });
+
+      it('should throw with undefined', () => {
+        expect(() => Email.create(undefined as any)).toThrow('Invalid email format');
+      });
+
+      it('should throw with too long email', () => {
+        const longEmail = 'a'.repeat(250) + '@example.com';
+        expect(() => Email.create(longEmail)).toThrow('Invalid email format');
+      });
     });
 
-    it('should trim whitespace', () => {
-      const result = Email.create('  test@example.com  ');
-      
-      expect(result.isSuccess()).toBe(true);
-      expect(result.value.toString()).toBe('test@example.com');
-    });
+    describe('equality', () => {
+      it('should be equal for same emails', () => {
+        const email1 = Email.create('test@example.com');
+        const email2 = Email.create('test@example.com');
+        expect(email1.equals(email2)).toBe(true);
+      });
 
-    it('should fail with invalid email format', () => {
-      const result = Email.create('invalid-email');
-      
-      expect(result.isFailure()).toBe(true);
-      expect(result.error).toBe('Invalid email format');
-    });
+      it('should be equal after normalization', () => {
+        const email1 = Email.create('TEST@EXAMPLE.COM');
+        const email2 = Email.create('test@example.com');
+        expect(email1.equals(email2)).toBe(true);
+      });
 
-    it('should fail with empty email', () => {
-      const result = Email.create('');
-      
-      expect(result.isFailure()).toBe(true);
-      expect(result.error).toBe('Email is required');
-    });
-
-    it('should fail with email too long', () => {
-      const longEmail = 'a'.repeat(250) + '@example.com';
-      const result = Email.create(longEmail);
-      
-      expect(result.isFailure()).toBe(true);
-      expect(result.error).toBe('Invalid email format');
-    });
-  });
-
-  describe('equality', () => {
-    it('should be equal when values match', () => {
-      const email1 = Email.create('test@example.com').value;
-      const email2 = Email.create('test@example.com').value;
-      
-      expect(email1.equals(email2)).toBe(true);
-    });
-
-    it('should not be equal when values differ', () => {
-      const email1 = Email.create('test@example.com').value;
-      const email2 = Email.create('other@example.com').value;
-      
-      expect(email1.equals(email2)).toBe(false);
-    });
-  });
-});
-
-describe('Password Value Object', () => {
-  describe('creation', () => {
-    it('should create password with valid input', async () => {
-      const result = await Password.create('validpassword123');
-      
-      expect(result.isSuccess()).toBe(true);
-      expect(result.value.getHash()).toBeDefined();
-      expect(result.value.getHash().length).toBeGreaterThan(0);
-    });
-
-    it('should fail with password too short', async () => {
-      const result = await Password.create('short');
-      
-      expect(result.isFailure()).toBe(true);
-      expect(result.error).toBe('Password must be at least 8 characters long');
-    });
-
-    it('should fail with password too long', async () => {
-      const longPassword = 'a'.repeat(101);
-      const result = await Password.create(longPassword);
-      
-      expect(result.isFailure()).toBe(true);
-      expect(result.error).toBe('Password must be less than 100 characters');
-    });
-
-    it('should fail with empty password', async () => {
-      const result = await Password.create('');
-      
-      expect(result.isFailure()).toBe(true);
-      expect(result.error).toBe('Password is required');
-    });
-  });
-
-  describe('verification', () => {
-    it('should verify correct password', async () => {
-      const plaintext = 'testpassword123';
-      const password = (await Password.create(plaintext)).value;
-      
-      const isValid = await password.verify(plaintext);
-      expect(isValid).toBe(true);
-    });
-
-    it('should reject incorrect password', async () => {
-      const password = (await Password.create('testpassword123')).value;
-      
-      const isValid = await password.verify('wrongpassword');
-      expect(isValid).toBe(false);
-    });
-
-    it('should reject empty password verification', async () => {
-      const password = (await Password.create('testpassword123')).value;
-      
-      const isValid = await password.verify('');
-      expect(isValid).toBe(false);
-    });
-  });
-
-  describe('fromHash', () => {
-    it('should create password from valid hash', () => {
-      const hash = '$2b$12$validhashexample';
-      const result = Password.fromHash(hash);
-      
-      expect(result.isSuccess()).toBe(true);
-      expect(result.value.getHash()).toBe(hash);
-    });
-
-    it('should fail with empty hash', () => {
-      const result = Password.fromHash('');
-      
-      expect(result.isFailure()).toBe(true);
-      expect(result.error).toBe('Password hash is required');
-    });
-  });
-});
-
-describe('User Entity', () => {
-  let validEmail: Email;
-  let validPassword: Password;
-
-  beforeEach(async () => {
-    validEmail = Email.create('test@example.com').value;
-    validPassword = (await Password.create('validpassword123')).value;
-  });
-
-  describe('creation', () => {
-    it('should create user with valid email and password', async () => {
-      const result = await User.create(validEmail, validPassword);
-      
-      expect(result.isSuccess()).toBe(true);
-      expect(result.value.id).toBeDefined();
-      expect(result.value.email.equals(validEmail)).toBe(true);
-      expect(result.value.createdAt).toBeInstanceOf(Date);
-      expect(result.value.updatedAt).toBeInstanceOf(Date);
-      expect(result.value.lastLogin).toBeNull();
-    });
-  });
-
-  describe('authentication', () => {
-    it('should authenticate with correct password', async () => {
-      const user = (await User.create(validEmail, validPassword)).value;
-      
-      const isAuthenticated = await user.authenticate('validpassword123');
-      expect(isAuthenticated).toBe(true);
-    });
-
-    it('should reject incorrect password', async () => {
-      const user = (await User.create(validEmail, validPassword)).value;
-      
-      const isAuthenticated = await user.authenticate('wrongpassword');
-      expect(isAuthenticated).toBe(false);
-    });
-  });
-
-  describe('updateLastLogin', () => {
-    it('should update last login time', async () => {
-      const user = (await User.create(validEmail, validPassword)).value;
-      expect(user.lastLogin).toBeNull();
-      
-      // Add small delay to ensure timestamp difference
-      await new Promise(resolve => setTimeout(resolve, 1));
-      
-      const updatedUser = user.updateLastLogin();
-      
-      expect(updatedUser.lastLogin).toBeInstanceOf(Date);
-      expect(updatedUser.id).toBe(user.id);
-      expect(updatedUser.email.equals(user.email)).toBe(true);
-      expect(updatedUser.updatedAt.getTime()).toBeGreaterThan(user.updatedAt.getTime());
-    });
-  });
-
-  describe('getInternalState', () => {
-    it('should expose all data needed for persistence', async () => {
-      const user = (await User.create(validEmail, validPassword)).value;
-      const state = user.getInternalState();
-      
-      expect(state).toMatchObject({
-        id: expect.any(String),
-        email: 'test@example.com',
-        passwordHash: expect.any(String),
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-        lastLogin: null
+      it('should not be equal for different emails', () => {
+        const email1 = Email.create('test1@example.com');
+        const email2 = Email.create('test2@example.com');
+        expect(email1.equals(email2)).toBe(false);
       });
     });
   });
 
-  describe('fromPersistence', () => {
-    it('should reconstruct user from persistence data', () => {
-      const persistenceData = {
-        id: 'test-id',
-        email: 'test@example.com',
-        passwordHash: '$2b$12$validhashexample',
-        createdAt: new Date('2023-01-01'),
-        updatedAt: new Date('2023-01-02'),
-        lastLogin: new Date('2023-01-03')
-      };
-      
-      const result = User.fromPersistence(persistenceData);
-      
-      expect(result.isSuccess()).toBe(true);
-      expect(result.value.id).toBe('test-id');
-      expect(result.value.email.toString()).toBe('test@example.com');
-      expect(result.value.lastLogin).toEqual(new Date('2023-01-03'));
+  describe('Password Value Object', () => {
+    describe('creation', () => {
+      it('should create password with valid input', async () => {
+        const password = await Password.create('validpassword123');
+        expect(password.getHash()).toBeDefined();
+        expect(password.getHash()).toContain('$2b$');
+      });
+
+      it('should hash password using bcrypt', async () => {
+        const password = await Password.create('testpassword123');
+        const hash = password.getHash();
+        expect(hash).toMatch(/^\$2b\$12\$/);
+      });
     });
 
-    it('should fail with invalid email in persistence data', () => {
-      const persistenceData = {
-        id: 'test-id',
-        email: 'invalid-email',
-        passwordHash: '$2b$12$validhashexample',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        lastLogin: null
-      };
-      
-      const result = User.fromPersistence(persistenceData);
-      
-      expect(result.isFailure()).toBe(true);
-      expect(result.error).toContain('Invalid email in persistence data');
+    describe('validation failures', () => {
+      it('should throw with short password', async () => {
+        await expect(Password.create('short')).rejects.toThrow('Password must be at least 8 characters long');
+      });
+
+      it('should throw with empty password', async () => {
+        await expect(Password.create('')).rejects.toThrow('Password is required');
+      });
+
+      it('should throw with null password', async () => {
+        await expect(Password.create(null as any)).rejects.toThrow('Password is required');
+      });
+
+      it('should throw with undefined password', async () => {
+        await expect(Password.create(undefined as any)).rejects.toThrow('Password is required');
+      });
+
+      it('should throw with too long password', async () => {
+        const longPassword = 'a'.repeat(101);
+        await expect(Password.create(longPassword)).rejects.toThrow('Password must be less than 100 characters');
+      });
+    });
+
+    describe('verification', () => {
+      it('should verify correct password', async () => {
+        const password = await Password.create('testpassword123');
+        const isValid = await password.verify('testpassword123');
+        expect(isValid).toBe(true);
+      });
+
+      it('should reject incorrect password', async () => {
+        const password = await Password.create('testpassword123');
+        const isValid = await password.verify('wrongpassword');
+        expect(isValid).toBe(false);
+      });
+
+      it('should handle null input gracefully', async () => {
+        const password = await Password.create('testpassword123');
+        const isValid = await password.verify(null as any);
+        expect(isValid).toBe(false);
+      });
+
+      it('should handle empty string input gracefully', async () => {
+        const password = await Password.create('testpassword123');
+        const isValid = await password.verify('');
+        expect(isValid).toBe(false);
+      });
+
+      it('should handle corrupted hash gracefully', async () => {
+        const password = Password.fromHash('corrupted-hash');
+        const isValid = await password.verify('anypassword');
+        expect(isValid).toBe(false);
+      });
+    });
+
+    describe('fromHash', () => {
+      it('should create password from valid hash', () => {
+        const hash = '$2b$12$validhashhere';
+        const password = Password.fromHash(hash);
+        expect(password.getHash()).toBe(hash);
+      });
+
+      it('should throw with invalid hash', () => {
+        expect(() => Password.fromHash('')).toThrow('Password hash is required');
+        expect(() => Password.fromHash(null as any)).toThrow('Password hash is required');
+      });
+    });
+  });
+
+  describe('User Entity', () => {
+    describe('creation', () => {
+      it('should create user with valid data', async () => {
+        const email = Email.create('test@example.com');
+        const password = await Password.create('validpassword123');
+
+        const user = await User.create({ email, password });
+
+        expect(user.id).toBeDefined();
+        expect(user.email.toString()).toBe('test@example.com');
+        expect(user.createdAt).toBeInstanceOf(Date);
+        expect(user.updatedAt).toBeInstanceOf(Date);
+        expect(user.lastLogin).toBeNull();
+      });
+    });
+
+    describe('authentication', () => {
+      it('should authenticate with correct password', async () => {
+        const email = Email.create('test@example.com');
+        const password = await Password.create('validpassword123');
+        const user = await User.create({ email, password });
+
+        const isAuthenticated = await user.authenticate('validpassword123');
+        expect(isAuthenticated).toBe(true);
+      });
+
+      it('should reject incorrect password', async () => {
+        const email = Email.create('test@example.com');
+        const password = await Password.create('validpassword123');
+        const user = await User.create({ email, password });
+
+        const isAuthenticated = await user.authenticate('wrongpassword');
+        expect(isAuthenticated).toBe(false);
+      });
+    });
+
+    describe('last login update', () => {
+      it('should update last login time', async () => {
+        const email = Email.create('test@example.com');
+        const password = await Password.create('validpassword123');
+        const user = await User.create({ email, password });
+
+        expect(user.lastLogin).toBeNull();
+
+        const updatedUser = user.updateLastLogin();
+        expect(updatedUser.lastLogin).toBeInstanceOf(Date);
+        expect(updatedUser.lastLogin!.getTime()).toBeGreaterThan(Date.now() - 1000);
+      });
+
+      it('should create new user instance', async () => {
+        const email = Email.create('test@example.com');
+        const password = await Password.create('validpassword123');
+        const user = await User.create({ email, password });
+
+        const updatedUser = user.updateLastLogin();
+        expect(updatedUser).not.toBe(user); // Should be different instance
+        expect(updatedUser.id).toBe(user.id); // But same ID
+      });
+    });
+
+    describe('immutability', () => {
+      it('should be immutable', async () => {
+        const email = Email.create('test@example.com');
+        const password = await Password.create('validpassword123');
+        const user = await User.create({ email, password });
+
+        const originalCreatedAt = user.createdAt;
+        const updatedUser = user.updateLastLogin();
+
+        // Original user should be unchanged
+        expect(user.lastLogin).toBeNull();
+        expect(user.createdAt).toBe(originalCreatedAt);
+
+        // Updated user should have new lastLogin
+        expect(updatedUser.lastLogin).toBeInstanceOf(Date);
+        expect(updatedUser.createdAt).toBe(originalCreatedAt);
+      });
     });
   });
 });

@@ -1,17 +1,17 @@
 import { FastifyInstance } from 'fastify';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import { 
-  SignupRouteSchema, 
+import {
+  SignupRouteSchema,
   LoginRouteSchema,
   type SignupRequestType,
-  type LoginRequestType 
+  type LoginRequestType
 } from '@repo/api-schemas';
 import { UserRepository } from '../domain/User/UserRepository';
 import { EventRepository } from '../domain/DomainEvent/EventRepository';
 import { registerUser } from '../domain/User/features/register-user';
 import { authenticateUser } from '../domain/User/features/authenticate-user';
 import { generateToken, getTokenExpiration } from '../lib/auth';
-import '../shared/types'; // Import Fastify interface extensions
+import { withTransaction } from '../shared/transaction';
 
 export async function authRoutes(fastify: FastifyInstance) {
   const server = fastify.withTypeProvider<TypeBoxTypeProvider>();
@@ -22,31 +22,20 @@ export async function authRoutes(fastify: FastifyInstance) {
   }, async (request, reply) => {
     const { email, password } = request.body as SignupRequestType;
 
-    // Instantiate dependencies with transaction
-    const userRepository = new UserRepository(request.transaction);
-    const eventRepository = new EventRepository(request.transaction);
+    const result = await withTransaction(async (trx) => {
+      // Instantiate dependencies with transaction
+      const userRepository = new UserRepository(trx);
+      const eventRepository = new EventRepository(trx);
 
-    // Execute register user feature
-    const result = await registerUser(
-      { email, password },
-      { userRepository, eventRepository }
-    );
-
-    // Handle result
-    if (result.isFailure()) {
-      const errorCode = result.error === 'User already exists' ? 409 : 400;
-      const code = result.error === 'User already exists' ? 'USER_EXISTS' : 'SIGNUP_ERROR';
-      
-      return reply.status(errorCode).send({
-        error: {
-          message: result.error,
-          code
-        }
-      });
-    }
+      // Execute register user feature (throws on error)
+      return await registerUser(
+        { email, password },
+        { userRepository, eventRepository }
+      );
+    });
 
     // Generate JWT token
-    const userState = result.value.user.getInternalState();
+    const userState = result.user.getInternalState();
     const token = generateToken({
       id: userState.id,
       email: userState.email,
@@ -75,28 +64,20 @@ export async function authRoutes(fastify: FastifyInstance) {
   }, async (request, reply) => {
     const { email, password } = request.body as LoginRequestType;
 
-    // Instantiate dependencies with transaction
-    const userRepository = new UserRepository(request.transaction);
-    const eventRepository = new EventRepository(request.transaction);
+    const result = await withTransaction(async (trx) => {
+      // Instantiate dependencies with transaction
+      const userRepository = new UserRepository(trx);
+      const eventRepository = new EventRepository(trx);
 
-    // Execute authenticate user feature
-    const result = await authenticateUser(
-      { email, password },
-      { userRepository, eventRepository }
-    );
-
-    // Handle result
-    if (result.isFailure()) {
-      return reply.status(401).send({
-        error: {
-          message: 'Invalid credentials',
-          code: 'INVALID_CREDENTIALS'
-        }
-      });
-    }
+      // Execute authenticate user feature (throws on error)
+      return await authenticateUser(
+        { email, password },
+        { userRepository, eventRepository }
+      );
+    });
 
     // Generate JWT token
-    const userState = result.value.user.getInternalState();
+    const userState = result.user.getInternalState();
     const token = generateToken({
       id: userState.id,
       email: userState.email,

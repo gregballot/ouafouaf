@@ -3,24 +3,24 @@ import { User, ErrorResponse } from './common';
 
 // Auth request schemas
 export const SignupRequest = Type.Object({
-  email: Type.String({ 
+  email: Type.String({
     format: 'email',
     minLength: 1,
     maxLength: 255
   }),
-  password: Type.String({ 
+  password: Type.String({
     minLength: 8,
     maxLength: 100
   })
 });
 
 export const LoginRequest = Type.Object({
-  email: Type.String({ 
+  email: Type.String({
     format: 'email',
     minLength: 1,
     maxLength: 255
   }),
-  password: Type.String({ 
+  password: Type.String({
     minLength: 8,
     maxLength: 100
   })

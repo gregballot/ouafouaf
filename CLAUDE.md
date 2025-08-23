@@ -132,16 +132,80 @@ pnpm db:down
 - `apps/api/src/index.ts` - Backend API entry point
 - `packages/typescript-config/` - Shared TypeScript configurations
 
-## Testing Instructions
+## Testing Philosophy & Instructions
 
-Currently using TypeScript for type checking and ESLint for code quality:
+### Testing Approach
+
+We follow a **pragmatic testing strategy** that emphasizes real integration over mocking:
+
+#### Integration Tests for Features
+- **No mocks for repositories or database operations** - use real database with transaction isolation
+- **Test complete workflows** - verify the entire feature flow from input to database changes
+- **Use Builder pattern** for test data creation via `[Entity]Builder.ts` files
+- **Verify domain events** - check that events are published to database
+- **Transaction isolation** - each test runs in its own transaction and cleans up
+
+#### Unit Tests for Entities
+- **Pure business logic testing** - test domain rules, validation, and entity behavior
+- **Value object validation** - test all edge cases for email, password, etc.
+- **No external dependencies** - entities should be testable in isolation
+
+### Test Structure Examples
+
+```typescript
+// Feature Integration Test (PREFERRED)
+it('should register user successfully', async () => {
+  const result = await withTransaction(async (trx) => {
+    const userRepository = new UserRepository(trx);
+    const eventRepository = new EventRepository(trx);
+
+    return await registerUser(
+      { email: 'test@example.com', password: 'validpassword123' },
+      { userRepository, eventRepository }
+    );
+  });
+
+  // Verify returned data
+  expect(result.user.id).toBeDefined();
+
+  // Verify database state
+  await withTransaction(async (trx) => {
+    const userRepository = new UserRepository(trx);
+    const savedUser = await userRepository.findById(result.user.id);
+    expect(savedUser).toBeTruthy();
+  });
+
+  // Verify domain events
+  await withTransaction(async (trx) => {
+    const eventRepository = new EventRepository(trx);
+    const events = await eventRepository.findByAggregateId(result.user.id);
+    expect(events).toHaveLength(1);
+    expect(events[0].eventName).toBe('UserRegistered');
+  });
+});
+
+// Entity Unit Test
+it('should create user with valid data', async () => {
+  const email = Email.create('test@example.com');
+  const password = await Password.create('validpassword123');
+  const user = await User.create({ email, password });
+
+  expect(user.id).toBeDefined();
+  expect(user.email.toString()).toBe('test@example.com');
+});
+```
+
+### Quality Verification Commands
 
 ```bash
 # Type checking across all packages
 pnpm type-check
 
-# Code linting across all packages  
+# Code linting across all packages
 pnpm lint
+
+# Run integration tests (requires local database)
+pnpm test
 
 # Build verification
 pnpm build
@@ -171,7 +235,7 @@ pnpm dev
 
 **Vercel Setup:**
 - Frontend app: Deploy from `apps/web` directory
-- API app: Deploy from `apps/api` directory  
+- API app: Deploy from `apps/api` directory
 - Configure Vercel Postgres for production database
 - Set environment variables for database connections
 

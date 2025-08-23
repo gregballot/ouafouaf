@@ -8,6 +8,10 @@ export class UserRegistered implements DomainEvent {
   ) {}
 
   eventName = 'UserRegistered' as const;
+
+  get aggregateId(): string {
+    return this.userId;
+  }
 }
 
 export class UserLoggedIn implements DomainEvent {
@@ -17,6 +21,10 @@ export class UserLoggedIn implements DomainEvent {
   ) {}
 
   eventName = 'UserLoggedIn' as const;
+
+  get aggregateId(): string {
+    return this.userId;
+  }
 }
 
 // Export union type for this subdomain

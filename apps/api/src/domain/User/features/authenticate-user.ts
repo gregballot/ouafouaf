@@ -1,74 +1,78 @@
-import { Result } from '../../../shared/Result';
 import { User, Email } from '../User';
 import { UserRepository } from '../UserRepository';
 import { EventRepository } from '../../DomainEvent/EventRepository';
 import { UserLoggedIn } from '../event';
+import { InvalidCredentialsError } from '../../../shared/errors';
+import { logger } from '../../../lib/logger';
 
 // Input payload type
-export type AuthenticateUserPayload = {
+export interface AuthenticateUserPayload {
   email: string;
   password: string;
-};
+}
 
 // Dependency injection type
-export type AuthenticateUserDependencies = {
+export interface AuthenticateUserDependencies {
   userRepository: UserRepository;
   eventRepository?: EventRepository;
-};
+}
 
 // Return type
-export type AuthenticateUserResult = {
+export interface AuthenticateUserResult {
   user: User;
-};
+}
 
-// Feature function
+// Feature function - clean and simple, no Result pattern
 export async function authenticateUser(
   payload: AuthenticateUserPayload,
   dependencies: AuthenticateUserDependencies
-): Promise<Result<AuthenticateUserResult>> {
+): Promise<AuthenticateUserResult> {
   const { userRepository, eventRepository } = dependencies;
 
-  // 1. Validate input and create value objects
-  const emailResult = Email.create(payload.email);
-  if (emailResult.isFailure()) {
-    return Result.fail('Invalid credentials');
-  }
+  // 1. Validate input and create value objects (throws on validation error)
+  const email = Email.create(payload.email);
 
   if (!payload.password || typeof payload.password !== 'string') {
-    return Result.fail('Invalid credentials');
+    throw new InvalidCredentialsError();
   }
 
-  // 2. Find user by email
-  const user = await userRepository.findByEmail(emailResult.value);
-  if (!user) {
-    return Result.fail('Invalid credentials');
+  // 2. Find user by email (returns null if not found)
+  const user = await userRepository.findByEmail(email);
+
+  // 3. Verify password - always perform password hashing to prevent timing attacks
+  let isValid = false;
+  if (user) {
+    isValid = await user.authenticate(payload.password);
+  } else {
+    // Perform a dummy bcrypt operation to normalize timing
+    // even when user doesn't exist
+    const bcrypt = await import('bcrypt');
+    await bcrypt.compare(payload.password, '$2b$12$dummy.hash.to.prevent.timing.attacks.with.consistent.work.factor');
   }
 
-  // 3. Verify password
-  const isValid = await user.authenticate(payload.password);
-  if (!isValid) {
-    return Result.fail('Invalid credentials');
+  if (!user || !isValid) {
+    throw new InvalidCredentialsError();
   }
 
   // 4. Update last login
   const updatedUser = user.updateLastLogin();
-  const savedUserResult = await userRepository.save(updatedUser);
-  if (savedUserResult.isFailure()) {
-    return Result.fail(savedUserResult.error);
-  }
 
-  // 5. Publish domain event (optional)
+  // 5. Save updated user (throws DatabaseError on failure)
+  const savedUser = await userRepository.save(updatedUser);
+
+  // 6. Publish domain event (optional, don't fail authentication if this fails)
   if (eventRepository) {
-    const eventResult = await eventRepository.publish(
-      new UserLoggedIn(savedUserResult.value.id)
-    );
-    if (eventResult.isFailure()) {
+    try {
+      await eventRepository.publish(
+        new UserLoggedIn(savedUser.id)
+      );
+    } catch (error) {
       // Log the error but don't fail the authentication
-      console.error('Failed to publish UserLoggedIn event:', eventResult.error);
+      logger.error('Failed to publish UserLoggedIn event:', error instanceof Error ? error : new Error(String(error)));
     }
   }
 
-  return Result.success({
-    user: savedUserResult.value
-  });
+  return {
+    user: savedUser
+  };
 }

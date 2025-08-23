@@ -15,21 +15,9 @@ export class UserBuilder {
   }
 
   async build(): Promise<User> {
-    const emailResult = Email.create(this.email);
-    if (emailResult.isFailure()) {
-      throw new Error(`Invalid test email: ${emailResult.error}`);
-    }
-
-    const passwordResult = await Password.create(this.password);
-    if (passwordResult.isFailure()) {
-      throw new Error(`Invalid test password: ${passwordResult.error}`);
-    }
-
-    const userResult = await User.create(emailResult.value, passwordResult.value);
-    if (userResult.isFailure()) {
-      throw new Error(`Invalid test user: ${userResult.error}`);
-    }
-
-    return userResult.value;
+    const email = Email.create(this.email);
+    const password = await Password.create(this.password);
+    const user = await User.create({ email, password });
+    return user;
   }
 }

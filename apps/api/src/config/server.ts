@@ -1,88 +1,64 @@
-import Fastify from 'fastify'
+import Fastify, { FastifyInstance } from 'fastify'
 import cors from '@fastify/cors'
 import swagger from '@fastify/swagger'
-import swaggerUi from '@fastify/swagger-ui'
+import swaggerUI from '@fastify/swagger-ui'
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
-import { env } from './env'
-import { swaggerConfig, swaggerUiConfig } from './swagger'
 import { initializeDatabase } from './database'
-import { getConnection } from '@repo/database'
+import { createKyselyInstance } from '../shared/kysely'
+import { registerErrorHandler } from '../shared/error-handler'
+import { registerRoutes } from '../routes'
+import { env } from './env'
+import { logger } from '../lib/logger'
 import '../shared/types' // Import Fastify interface extensions
 
-export async function createServer() {
+export async function createServer(): Promise<FastifyInstance> {
   const fastify = Fastify({
-    logger: {
-      level: 'info'
-    }
+    logger: env.NODE_ENV !== 'test'
   }).withTypeProvider<TypeBoxTypeProvider>()
 
-  // Register plugins
-  await fastify.register(cors, {
-    origin: env.NODE_ENV === 'production' 
-      ? [env.FRONTEND_URL] 
-      : true
-  })
+  // Initialize logger singleton with Fastify logger
+  logger.initialize(fastify.log)
 
-  await fastify.register(swagger, swaggerConfig)
-  await fastify.register(swaggerUi, swaggerUiConfig)
-
-  // Initialize database connection
+  // Initialize database and Kysely
   initializeDatabase()
+  createKyselyInstance()
 
-  // Transaction management hooks
-  fastify.addHook('onRequest', async (request) => {
-    try {
-      const client = await getConnection()
-      await client.query('BEGIN')
-      
-      request.transaction = {
-        query: (sql: string, params?: any[]) => client.query(sql, params) as any,
-        commit: async () => {
-          await client.query('COMMIT')
-        },
-        rollback: async () => {
-          await client.query('ROLLBACK')
-        },
-        release: () => client.release(),
-        isCompleted: false
-      }
-    } catch (error) {
-      fastify.log.error({ error }, 'Failed to create transaction')
-      throw error
-    }
+  // Register error handler first
+  registerErrorHandler(fastify)
+
+  // CORS configuration
+  await fastify.register(cors, {
+    origin: env.NODE_ENV === 'production'
+      ? ['https://your-domain.vercel.app']
+      : true,
+    credentials: true
   })
 
-  fastify.addHook('onResponse', async (request) => {
-    if (request.transaction && !request.transaction.isCompleted) {
-      try {
-        await request.transaction.commit()
-        request.transaction.isCompleted = true
-      } catch (error) {
-        fastify.log.error({ error }, 'Failed to commit transaction')
-        // Try to rollback
-        try {
-          await request.transaction.rollback()
-        } catch (rollbackError) {
-          fastify.log.error({ rollbackError }, 'Failed to rollback after commit failure')
+  // Swagger documentation
+  if (env.NODE_ENV !== 'production') {
+    await fastify.register(swagger, {
+      openapi: {
+        info: {
+          title: 'Ouafouaf API',
+          description: 'API documentation for Ouafouaf',
+          version: '1.0.0'
         }
-      } finally {
-        request.transaction.release()
       }
-    }
-  })
+    })
 
-  fastify.addHook('onError', async (request) => {
-    if (request.transaction && !request.transaction.isCompleted) {
-      try {
-        await request.transaction.rollback()
-        request.transaction.isCompleted = true
-      } catch (rollbackError) {
-        fastify.log.error({ rollbackError }, 'Failed to rollback transaction')
-      } finally {
-        request.transaction.release()
+    await fastify.register(swaggerUI, {
+      routePrefix: '/docs',
+      uiConfig: {
+        docExpansion: 'full',
+        deepLinking: false
       }
-    }
-  })
+    })
+  }
+
+  // No transaction hooks needed - we handle transactions in routes using withTransaction()
+
+  // Register routes
+  await fastify.register(registerRoutes)
 
   return fastify
 }

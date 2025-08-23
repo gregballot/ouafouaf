@@ -1,70 +1,81 @@
-import { Result } from '../../shared/Result';
+import { Transaction } from 'kysely';
+import { Database } from '../../shared/database-types';
 import { User, Email } from './User';
-
-// Define a simple Transaction interface for now
-interface Transaction {
-  query(sql: string, params: any[]): Promise<any>;
-}
+import {
+  DatabaseError,
+  UserNotFoundError,
+  UserAlreadyExistsError
+} from '../../shared/errors';
 
 export class UserRepository {
-  constructor(private transaction: Transaction) {}
+  // Always work within a transaction - no more Kysely OR Transaction
+  constructor(private trx: Transaction<Database>) {}
 
-  async save(user: User): Promise<Result<User>> {
+  async save(user: User): Promise<User> {
     const state = user.getInternalState();
 
     try {
       // Check if user exists
-      const existingUser = await this.findById(state.id);
+      const existing = await this.trx
+        .selectFrom('users')
+        .select('id')
+        .where('id', '=', state.id)
+        .executeTakeFirst();
 
-      if (existingUser) {
+      if (existing) {
         // Update existing user
-        await this.transaction.query(`
-          UPDATE users 
-          SET email = $1, password_hash = $2, updated_at = $3, last_login = $4
-          WHERE id = $5
-        `, [
-          state.email,
-          state.passwordHash,
-          state.updatedAt,
-          state.lastLogin,
-          state.id
-        ]);
+        await this.trx
+          .updateTable('users')
+          .set({
+            email: state.email,
+            password_hash: state.passwordHash,
+            updated_at: state.updatedAt,
+            last_login: state.lastLogin
+          })
+          .where('id', '=', state.id)
+          .execute();
       } else {
         // Create new user
-        await this.transaction.query(`
-          INSERT INTO users (id, email, password_hash, created_at, updated_at, last_login)
-          VALUES ($1, $2, $3, $4, $5, $6)
-        `, [
-          state.id,
-          state.email,
-          state.passwordHash,
-          state.createdAt,
-          state.updatedAt,
-          state.lastLogin
-        ]);
+        await this.trx
+          .insertInto('users')
+          .values({
+            id: state.id,
+            email: state.email,
+            password_hash: state.passwordHash,
+            created_at: state.createdAt,
+            updated_at: state.updatedAt,
+            last_login: state.lastLogin
+          })
+          .execute();
       }
 
-      return Result.success(user);
+      return user;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      return Result.fail(`Failed to save user: ${message}`);
+      throw new DatabaseError(`Failed to save user: ${message}`, error);
     }
   }
 
   async findById(id: string): Promise<User | null> {
     try {
-      const result = await this.transaction.query(`
-        SELECT id, email, password_hash, created_at, updated_at, last_login
-        FROM users
-        WHERE id = $1
-      `, [id]);
+      const row = await this.trx
+        .selectFrom('users')
+        .select([
+          'id',
+          'email',
+          'password_hash',
+          'created_at',
+          'updated_at',
+          'last_login'
+        ])
+        .where('id', '=', id)
+        .executeTakeFirst();
 
-      if (result.rows.length === 0) {
+      if (!row) {
         return null;
       }
 
-      const row = result.rows[0];
-      const userResult = User.fromPersistence({
+      return User.fromPersistence({
         id: row.id,
         email: row.email,
         passwordHash: row.password_hash,
@@ -72,28 +83,32 @@ export class UserRepository {
         updatedAt: row.updated_at,
         lastLogin: row.last_login
       });
-
-      return userResult.isSuccess() ? userResult.value : null;
     } catch (error) {
-      console.error('Error finding user by ID:', error);
-      return null;
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new DatabaseError(`Failed to find user by ID: ${message}`, error);
     }
   }
 
   async findByEmail(email: Email): Promise<User | null> {
     try {
-      const result = await this.transaction.query(`
-        SELECT id, email, password_hash, created_at, updated_at, last_login
-        FROM users
-        WHERE email = $1
-      `, [email.toString()]);
+      const row = await this.trx
+        .selectFrom('users')
+        .select([
+          'id',
+          'email',
+          'password_hash',
+          'created_at',
+          'updated_at',
+          'last_login'
+        ])
+        .where('email', '=', email.toString())
+        .executeTakeFirst();
 
-      if (result.rows.length === 0) {
+      if (!row) {
         return null;
       }
 
-      const row = result.rows[0];
-      const userResult = User.fromPersistence({
+      return User.fromPersistence({
         id: row.id,
         email: row.email,
         passwordHash: row.password_hash,
@@ -101,16 +116,32 @@ export class UserRepository {
         updatedAt: row.updated_at,
         lastLogin: row.last_login
       });
-
-      return userResult.isSuccess() ? userResult.value : null;
     } catch (error) {
-      console.error('Error finding user by email:', error);
-      return null;
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new DatabaseError(`Failed to find user by email: ${message}`, error);
     }
   }
 
-  async isEmailUnique(email: Email): Promise<boolean> {
+  async requireByEmail(email: Email): Promise<User> {
+    const user = await this.findByEmail(email);
+    if (!user) {
+      throw new UserNotFoundError();
+    }
+    return user;
+  }
+
+  async requireById(id: string): Promise<User> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new UserNotFoundError();
+    }
+    return user;
+  }
+
+  async assertEmailUnique(email: Email): Promise<void> {
     const existingUser = await this.findByEmail(email);
-    return existingUser === null;
+    if (existingUser) {
+      throw new UserAlreadyExistsError();
+    }
   }
 }
