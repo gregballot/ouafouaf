@@ -5,7 +5,7 @@ import type { SignupRequestType } from '@repo/api-schemas';
 
 export function SignupForm() {
   const { signup, isSigningUp, signupError, resetSignupError } = useAuth();
-  
+
   const form = useForm<SignupRequestType>({
     defaultValues: {
       email: '',

@@ -1,5 +1,6 @@
 import { createPool } from '@repo/database'
 import { env } from './env'
+import { logger } from '../lib/logger'
 
 export function initializeDatabase() {
   if (env.DATABASE_URL) {
@@ -37,17 +38,16 @@ export function initializeDatabase() {
         password: dbUrl.password
       })
     } catch (error) {
-      console.error('Failed to parse DATABASE_URL:', error)
+      logger.error('Failed to parse DATABASE_URL:', error instanceof Error ? error : new Error(String(error)))
       throw new Error(`Invalid DATABASE_URL: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   } else {
-    // Default local configuration
     createPool({
-      host: 'localhost',
-      port: 5432,
-      database: 'ouafouaf',
-      user: 'postgres',
-      password: 'postgres'
+      host: env.DB_HOST,
+      port: env.DB_PORT,
+      database: env.DB_NAME,
+      user: env.DB_USER,
+      password: env.DB_PASSWORD
     })
   }
 }

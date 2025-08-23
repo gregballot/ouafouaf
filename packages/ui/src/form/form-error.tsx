@@ -9,9 +9,9 @@ export interface FormErrorProps extends HTMLAttributes<HTMLDivElement> {
 export function FormError({ className = '', ...props }: FormErrorProps) {
   const { name, id } = useFormField();
   const { formState: { errors } } = useFormContext();
-  
+
   const error = errors[name];
-  
+
   if (!error?.message) {
     return null;
   }

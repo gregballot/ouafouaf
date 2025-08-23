@@ -192,38 +192,36 @@ describe('User Domain Entity - Unit Tests', () => {
 
         expect(user.lastLogin).toBeNull();
 
-        const updatedUser = user.updateLastLogin();
-        expect(updatedUser.lastLogin).toBeInstanceOf(Date);
-        expect(updatedUser.lastLogin!.getTime()).toBeGreaterThan(Date.now() - 1000);
+        user.updateLastLogin();
+        expect(user.lastLogin).toBeInstanceOf(Date);
+        expect(user.lastLogin!.getTime()).toBeGreaterThan(Date.now() - 1000);
       });
 
-      it('should create new user instance', async () => {
+      it('should update the same user instance', async () => {
         const email = Email.create('test@example.com');
         const password = await Password.create('validpassword123');
         const user = await User.create({ email, password });
 
-        const updatedUser = user.updateLastLogin();
-        expect(updatedUser).not.toBe(user); // Should be different instance
-        expect(updatedUser.id).toBe(user.id); // But same ID
+        const originalId = user.id;
+        user.updateLastLogin();
+        expect(user.lastLogin).toBeInstanceOf(Date);
+        expect(user.id).toBe(originalId); // Same ID
       });
     });
 
-    describe('immutability', () => {
-      it('should be immutable', async () => {
+    describe('state updates', () => {
+      it('should update state in place', async () => {
         const email = Email.create('test@example.com');
         const password = await Password.create('validpassword123');
         const user = await User.create({ email, password });
 
         const originalCreatedAt = user.createdAt;
-        const updatedUser = user.updateLastLogin();
-
-        // Original user should be unchanged
         expect(user.lastLogin).toBeNull();
-        expect(user.createdAt).toBe(originalCreatedAt);
 
-        // Updated user should have new lastLogin
-        expect(updatedUser.lastLogin).toBeInstanceOf(Date);
-        expect(updatedUser.createdAt).toBe(originalCreatedAt);
+        user.updateLastLogin();
+
+        expect(user.lastLogin).toBeInstanceOf(Date);
+        expect(user.createdAt).toBe(originalCreatedAt);
       });
     });
   });

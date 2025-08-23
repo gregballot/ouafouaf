@@ -5,7 +5,7 @@ import type { LoginRequestType } from '@repo/api-schemas';
 
 export function LoginForm() {
   const { login, isLoggingIn, loginError, resetLoginError } = useAuth();
-  
+
   const form = useForm<LoginRequestType>({
     defaultValues: {
       email: '',

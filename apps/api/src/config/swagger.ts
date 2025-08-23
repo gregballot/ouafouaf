@@ -1,25 +1,26 @@
-import { SwaggerOptions } from '@fastify/swagger'
-import { FastifySwaggerUiOptions } from '@fastify/swagger-ui'
+import { FastifyInstance } from 'fastify'
+import swagger from '@fastify/swagger'
+import swaggerUI from '@fastify/swagger-ui'
 import { env } from './env'
 
-export const swaggerConfig: SwaggerOptions = {
-  swagger: {
-    info: {
-      title: 'Ouafouaf API',
-      description: 'API for Ouafouaf application',
-      version: '1.0.0'
-    },
-    host: new URL(env.API_URL).host,
-    schemes: env.NODE_ENV === 'production' ? ['https'] : ['http'],
-    consumes: ['application/json'],
-    produces: ['application/json']
-  }
-}
+export async function registerSwagger(fastify: FastifyInstance): Promise<void> {
+  if (env.NODE_ENV !== 'production') {
+    await fastify.register(swagger, {
+      openapi: {
+        info: {
+          title: 'Ouafouaf API',
+          description: 'API documentation for Ouafouaf',
+          version: '1.0.0'
+        }
+      }
+    })
 
-export const swaggerUiConfig: FastifySwaggerUiOptions = {
-  routePrefix: '/docs',
-  uiConfig: {
-    docExpansion: 'full',
-    deepLinking: false
+    await fastify.register(swaggerUI, {
+      routePrefix: '/docs',
+      uiConfig: {
+        docExpansion: 'full',
+        deepLinking: false
+      }
+    })
   }
 }

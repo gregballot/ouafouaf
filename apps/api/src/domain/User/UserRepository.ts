@@ -8,7 +8,6 @@ import {
 } from '../../shared/errors';
 
 export class UserRepository {
-  // Always work within a transaction - no more Kysely OR Transaction
   constructor(private trx: Transaction<Database>) {}
 
   async save(user: User): Promise<User> {

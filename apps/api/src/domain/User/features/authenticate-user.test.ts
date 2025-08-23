@@ -1,25 +1,28 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { authenticateUser } from './authenticate-user';
 import { UserRepository } from '../UserRepository';
 import { EventRepository } from '../../DomainEvent/EventRepository';
 import { UserBuilder } from '../UserBuilder';
+import { User } from '../User';
 import { withTransaction } from '../../../shared/transaction';
 
 describe('Authenticate User Feature - Integration Tests', () => {
+  let testUser: User;
+
+  beforeEach(async () => {
+    await withTransaction(async (trx) => {
+      const userRepository = new UserRepository(trx);
+
+      testUser = await new UserBuilder()
+        .withEmail('test@example.com')
+        .withPassword('validpassword123')
+        .build();
+
+      await userRepository.save(testUser);
+    });
+  });
   describe('successful authentication', () => {
     it('should authenticate user with valid credentials', async () => {
-      // Arrange: Create a user first
-      let userId: string;
-      await withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
-        const testUser = await new UserBuilder()
-          .withEmail('test@example.com')
-          .withPassword('validpassword123')
-          .build();
-        const savedUser = await userRepository.save(testUser);
-        userId = savedUser.id;
-      });
-
       // Act: Authenticate the user
       const result = await withTransaction(async (trx) => {
         const userRepository = new UserRepository(trx);
@@ -40,12 +43,12 @@ describe('Authenticate User Feature - Integration Tests', () => {
       // Assert - check returned user
       expect(result.user.email.toString()).toBe('test@example.com');
       expect(result.user.lastLogin).toBeInstanceOf(Date);
-      expect(result.user.id).toBe(userId);
+      expect(result.user.id).toBe(testUser.id);
 
       // Assert - verify lastLogin was updated in database
       await withTransaction(async (trx) => {
         const userRepository = new UserRepository(trx);
-        const updatedUser = await userRepository.findById(userId);
+        const updatedUser = await userRepository.findById(testUser.id);
 
         expect(updatedUser).toBeTruthy();
         expect(updatedUser!.lastLogin).toBeInstanceOf(Date);
@@ -55,7 +58,7 @@ describe('Authenticate User Feature - Integration Tests', () => {
       // Assert - verify domain event was published
       await withTransaction(async (trx) => {
         const eventRepository = new EventRepository(trx);
-        const events = await eventRepository.findByAggregateId(userId);
+        const events = await eventRepository.findByAggregateId(testUser.id);
 
         expect(events).toHaveLength(1);
         expect(events[0].eventName).toBe('UserLoggedIn');
@@ -63,18 +66,6 @@ describe('Authenticate User Feature - Integration Tests', () => {
     });
 
     it('should authenticate user without event repository', async () => {
-      // Arrange: Create a user first
-      let userId: string;
-      await withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
-        const testUser = await new UserBuilder()
-          .withEmail('test@example.com')
-          .withPassword('validpassword123')
-          .build();
-        const savedUser = await userRepository.save(testUser);
-        userId = savedUser.id;
-      });
-
       // Act: Authenticate the user without event repository
       const result = await withTransaction(async (trx) => {
         const userRepository = new UserRepository(trx);
@@ -97,7 +88,7 @@ describe('Authenticate User Feature - Integration Tests', () => {
       // Assert - no events should be published
       await withTransaction(async (trx) => {
         const eventRepository = new EventRepository(trx);
-        const events = await eventRepository.findByAggregateId(userId);
+        const events = await eventRepository.findByAggregateId(testUser.id);
 
         expect(events).toHaveLength(0);
       });

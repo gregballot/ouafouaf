@@ -35,24 +35,12 @@ export async function authRoutes(fastify: FastifyInstance) {
     });
 
     // Generate JWT token
-    const userState = result.user.getInternalState();
-    const token = generateToken({
-      id: userState.id,
-      email: userState.email,
-      created_at: userState.createdAt.toISOString(),
-      updated_at: userState.updatedAt.toISOString(),
-      last_login: userState.lastLogin?.toISOString()
-    });
+    const userDetails = result.user.details;
+    const token = generateToken(userDetails);
     const expires_at = getTokenExpiration();
 
     return reply.status(201).send({
-      user: {
-        id: userState.id,
-        email: userState.email,
-        created_at: userState.createdAt.toISOString(),
-        updated_at: userState.updatedAt.toISOString(),
-        last_login: userState.lastLogin?.toISOString()
-      },
+      user: userDetails,
       token,
       expires_at
     });
@@ -77,24 +65,12 @@ export async function authRoutes(fastify: FastifyInstance) {
     });
 
     // Generate JWT token
-    const userState = result.user.getInternalState();
-    const token = generateToken({
-      id: userState.id,
-      email: userState.email,
-      created_at: userState.createdAt.toISOString(),
-      updated_at: userState.updatedAt.toISOString(),
-      last_login: userState.lastLogin?.toISOString()
-    });
+    const userDetails = result.user.details;
+    const token = generateToken(userDetails);
     const expires_at = getTokenExpiration();
 
     return reply.status(200).send({
-      user: {
-        id: userState.id,
-        email: userState.email,
-        created_at: userState.createdAt.toISOString(),
-        updated_at: userState.updatedAt.toISOString(),
-        last_login: userState.lastLogin?.toISOString()
-      },
+      user: userDetails,
       token,
       expires_at
     });

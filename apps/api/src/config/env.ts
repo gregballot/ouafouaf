@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import { z } from 'zod'
+import { logger } from '../lib/logger'
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -8,6 +9,12 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters long for security'),
   FRONTEND_URL: z.string().url().default('http://localhost:3000'),
   API_URL: z.string().url().default('http://localhost:4000'),
+  DB_HOST: z.string().default('localhost'),
+  DB_PORT: z.string().transform(Number).pipe(z.number().positive()).default('5432'),
+  DB_NAME: z.string().default('ouafouaf'),
+  DB_USER: z.string().default('postgres'),
+  DB_PASSWORD: z.string().default('postgres'),
+  PRODUCTION_DOMAIN: z.string().url().optional(),
 })
 
 function validateEnv() {
@@ -15,13 +22,13 @@ function validateEnv() {
     return envSchema.parse(process.env)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('❌ Environment validation failed:')
+      logger.error('❌ Environment validation failed:')
       error.errors.forEach((err) => {
-        console.error(`  • ${err.path.join('.')}: ${err.message}`)
+        logger.error(`  • ${err.path.join('.')}: ${err.message}`)
       })
-      console.error('\nPlease check your environment variables and try again.')
+      logger.error('\nPlease check your environment variables and try again.')
     } else {
-      console.error('❌ Failed to validate environment:', error)
+      logger.error('❌ Failed to validate environment:', error instanceof Error ? error : new Error(String(error)))
     }
     process.exit(1)
   }

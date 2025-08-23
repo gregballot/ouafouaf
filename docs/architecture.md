@@ -786,6 +786,33 @@ export function registerErrorHandler(fastify: FastifyInstance) {
 }
 ```
 
+## Code Quality Guidelines
+
+### Domain Encapsulation
+- **Never expose internal state**: Domain entities should not expose their internal structure via `getInternalState()` to API responses
+- **Public interfaces**: Create dedicated getters or `details` properties for external consumption
+- **Example**: `user.details` instead of `user.getInternalState()` in API responses
+
+### Dependency Injection Patterns
+- **Simple naming**: Use `Dependencies` instead of verbose exported names like `FeatureFunctionDependencies`
+- **Internal types**: Keep dependency interfaces internal to feature modules - don't export them unless needed elsewhere
+- **Clean signatures**: Feature functions should accept simple, focused dependency objects
+
+### Testing Patterns
+- **Shared test setup**: Use `beforeEach` to initialize transaction, repositories, and test data
+- **Global test variables**: Declare shared test variables (transaction, repositories, test entities) at the describe block level
+- **Avoid repetition**: Don't recreate the same test users/repositories in every test - set them up once per test suite
+
+### Entity State Management
+- **In-place updates**: Entity methods like `updateLastLogin()` should modify the entity state directly, not return new instances
+- **Consistency**: Keep state management patterns consistent across all entities
+- **Testing**: Update tests to expect mutation rather than immutability
+
+### Configuration Organization
+- **Separation of concerns**: Extract complex configuration (Swagger, CORS, etc.) into focused, single-purpose files
+- **Environment-driven**: Make all environment-dependent values configurable through environment variables
+- **No hardcoding**: Avoid hardcoded URLs, database credentials, or other deployment-specific values
+
 ## Migration Strategy
 
 When adding new domains or refactoring existing code:
@@ -797,7 +824,7 @@ When adding new domains or refactoring existing code:
 5. **Implement features** as functions with typed payloads
 6. **Create tests** (entity unit tests, feature integration tests)
 7. **Update routes** to use new architecture
-8. **Verify transaction management** works correctly
+8. **Follow code quality guidelines** for encapsulation, testing, and configuration
 
 ## Benefits
 

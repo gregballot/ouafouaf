@@ -1,19 +1,34 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { registerUser } from './register-user';
 import { UserRepository } from '../UserRepository';
 import { EventRepository } from '../../DomainEvent/EventRepository';
 import { UserBuilder } from '../UserBuilder';
+import { User } from '../User';
 import { withTransaction } from '../../../shared/transaction';
 
 describe('Register User Feature - Integration Tests', () => {
+  let existingUser: User;
+
+  beforeEach(async () => {
+    await withTransaction(async (trx) => {
+      const userRepository = new UserRepository(trx);
+
+      // Create an existing user for testing error cases
+      existingUser = await new UserBuilder()
+        .withEmail('existing@example.com')
+        .withPassword('validpassword123')
+        .build();
+
+      await userRepository.save(existingUser);
+    });
+  });
   describe('successful registration', () => {
     it('should register new user successfully', async () => {
       const result = await withTransaction(async (trx) => {
         const userRepository = new UserRepository(trx);
         const eventRepository = new EventRepository(trx);
 
-        // Act
-        const result = await registerUser(
+        return await registerUser(
           {
             email: 'test@example.com',
             password: 'validpassword123'
@@ -23,8 +38,6 @@ describe('Register User Feature - Integration Tests', () => {
             eventRepository
           }
         );
-
-        return result;
       });
 
       // Assert - check returned user
@@ -116,23 +129,13 @@ describe('Register User Feature - Integration Tests', () => {
 
   describe('business rule violations', () => {
     it('should fail when user already exists', async () => {
-      // Arrange: Create a user first
-      await withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
-        const existingUser = await new UserBuilder()
-          .withEmail('test@example.com')
-          .withPassword('existingpassword123')
-          .build();
-        await userRepository.save(existingUser);
-      });
-
-      // Act & Assert: Try to register with same email
+      // Act & Assert: Try to register with same email as existing user
       await expect(withTransaction(async (trx) => {
         const userRepository = new UserRepository(trx);
 
         return await registerUser(
           {
-            email: 'test@example.com',
+            email: 'existing@example.com',
             password: 'validpassword123'
           },
           {

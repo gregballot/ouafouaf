@@ -112,6 +112,17 @@ pnpm db:down
 - **Configuration Validation**: Verify all required environment variables and settings on startup.
 - **Error Scenario Testing**: Test failure cases, edge cases, and invalid inputs alongside happy paths.
 
+## Code Style Standards
+
+- **Comments**: Keep comments to a minimum. Only add comments when code is truly not self-explanatory. Avoid stating the obvious.
+- **File Structure**: Always end files with a newline character for proper POSIX compliance.
+- **Configuration**: Never hardcode values that could be environment-dependent. Use environment variables with sensible defaults.
+- **Logging**: Use the logger service instead of `console.*` methods throughout the application.
+- **Code Organization**: Extract complex configuration (like Swagger setup) into separate, focused files.
+- **Domain Encapsulation**: Never expose internal domain state directly. Use dedicated getters/methods for external access.
+- **Testing Structure**: Use `beforeEach` to set up test data and repositories. Declare shared test variables at the describe block level.
+- **Type Definitions**: Keep dependency injection types internal to modules. Use simple names like `Dependencies` rather than verbose exported names.
+
 ## Architecture Philosophy
 
 - **Domain-Driven Design**: Follow the architectural guidelines in `docs/architecture.md` for all API development

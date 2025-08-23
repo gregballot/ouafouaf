@@ -151,13 +151,21 @@ export class User {
     return this.params.password.verify(plaintext);
   }
 
-  updateLastLogin(): User {
+  updateLastLogin(): void {
     const now = new Date();
-    return new User({
-      ...this.params,
-      lastLogin: now,
-      updatedAt: now
-    });
+    this.params.lastLogin = now;
+    this.params.updatedAt = now;
+  }
+
+  // For API responses - exposes public data only
+  get details() {
+    return {
+      id: this.params.id,
+      email: this.params.email.toString(),
+      created_at: this.params.createdAt.toISOString(),
+      updated_at: this.params.updatedAt.toISOString(),
+      last_login: this.params.lastLogin?.toISOString()
+    };
   }
 
   // For persistence - exposes internal state

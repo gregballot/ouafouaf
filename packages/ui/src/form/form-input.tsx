@@ -13,7 +13,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
       register, 
       formState: { errors } 
     } = useFormContext();
-    
+
     const error = errors[name];
     const hasError = !!error;
 
