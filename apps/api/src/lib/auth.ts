@@ -1,17 +1,10 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import type { UserType } from '@repo/api-schemas';
+import { env } from '../config/env'
 
 const SALT_ROUNDS = 12;
 const JWT_EXPIRES_IN = '7d';
-
-function getJwtSecret(): string {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error('JWT_SECRET environment variable is required. Please set a secure secret key.');
-  }
-  return secret;
-}
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, SALT_ROUNDS);
@@ -27,7 +20,7 @@ export function generateToken(user: UserType): string {
       userId: user.id, 
       email: user.email 
     },
-    getJwtSecret(),
+    env.JWT_SECRET,
     { 
       expiresIn: JWT_EXPIRES_IN 
     }
@@ -36,7 +29,7 @@ export function generateToken(user: UserType): string {
 
 export function verifyToken(token: string): { userId: string; email: string } | null {
   try {
-    const decoded = jwt.verify(token, getJwtSecret()) as { userId: string; email: string };
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { userId: string; email: string };
     return decoded;
   } catch {
     return null;
