@@ -14,8 +14,8 @@ export function createKyselyInstance(): Kysely<Database> {
 
   kyselyInstance = new Kysely<Database>({
     dialect: new PostgresDialect({
-      pool: pool
-    })
+      pool: pool,
+    }),
   });
 
   return kyselyInstance;

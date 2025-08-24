@@ -9,7 +9,8 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'A flexible input component with validation states, icons, labels, and helper text. Supports different sizes and accessibility features.',
+        component:
+          'A flexible input component with validation states, icons, labels, and helper text. Supports different sizes and accessibility features.',
       },
     },
   },
@@ -35,7 +36,8 @@ const meta = {
     },
     error: {
       control: { type: 'text' },
-      description: 'Error message (overrides helperText and sets error variant)',
+      description:
+        'Error message (overrides helperText and sets error variant)',
     },
     placeholder: {
       control: { type: 'text' },
@@ -108,7 +110,14 @@ export const Disabled: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '300px' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        width: '300px',
+      }}
+    >
       <Input size="sm" label="Small" placeholder="Small input" />
       <Input size="md" label="Medium" placeholder="Medium input" />
       <Input size="lg" label="Large" placeholder="Large input" />
@@ -125,7 +134,14 @@ export const Sizes: Story = {
 
 export const ValidationStates: Story = {
   render: () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '300px' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        width: '300px',
+      }}
+    >
       <Input
         label="Default State"
         placeholder="Default input"
@@ -157,7 +173,14 @@ export const ValidationStates: Story = {
 
 export const InputTypes: Story = {
   render: () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '300px' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        width: '300px',
+      }}
+    >
       <Input label="Text" type="text" placeholder="Enter text" />
       <Input label="Email" type="email" placeholder="Enter email" />
       <Input label="Password" type="password" placeholder="Enter password" />

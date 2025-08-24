@@ -17,7 +17,7 @@ export class EventRepository {
           event_name: event.eventName,
           event_data: JSON.stringify(event),
           occurred_at: event.occurredAt,
-          created_at: new Date()
+          created_at: new Date(),
         })
         .execute();
     } catch (error) {
@@ -35,7 +35,7 @@ export class EventRepository {
         .orderBy('occurred_at', 'asc')
         .execute();
 
-      return rows.map(row => {
+      return rows.map((row) => {
         // If event_data is already an object (JSONB), return it directly
         // If it's a string, parse it
         if (typeof row.event_data === 'string') {
@@ -45,7 +45,10 @@ export class EventRepository {
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new DatabaseError(`Failed to find events by aggregate ID: ${message}`, error);
+      throw new DatabaseError(
+        `Failed to find events by aggregate ID: ${message}`,
+        error
+      );
     }
   }
 }

@@ -21,6 +21,7 @@ When working on non-straightforward tasks in this repository, follow this struct
 ## Project Overview
 
 Full-stack TypeScript monorepo using Turborepo with:
+
 - **Frontend**: Vite + React + SWC (apps/web)
 - **Backend**: Fastify API (apps/api)
 - **Database**: PostgreSQL (Vercel Postgres for production, Docker Compose locally)
@@ -32,14 +33,14 @@ Full-stack TypeScript monorepo using Turborepo with:
 ```
 ouafouaf/
 ├── apps/
-│   ├── web/                  # Frontend application
-│   └── api/                  # Backend API
+│   ├── web/                  # Vite + React + SWC frontend
+│   └── api/                  # Fastify backend API
 ├── packages/
-│   ├── ui/                   # Shared UI components
+│   ├── ui/                   # Shared React components
 │   ├── database/             # Database utilities & types
 │   ├── eslint-config/        # Shared ESLint configuration
 │   └── typescript-config/    # Shared TypeScript configurations
-├── docker-compose.yml        # Local development database
+├── docker-compose.yml        # PostgreSQL for local development
 ├── turbo.json               # Turborepo configuration
 └── pnpm-workspace.yaml      # Workspace definition
 ```
@@ -82,6 +83,7 @@ pnpm db:reset     # Drop all tables (destructive!)
 ## Database Migration System
 
 When working with the database:
+
 - **First time setup**: Always run `pnpm db:up && pnpm db:setup`
 - **Before running tests**: Ensure database is set up with `pnpm db:setup`
 - **Adding new migrations**: Create numbered SQL files in `packages/database/migrations/`
@@ -170,6 +172,7 @@ The migration system tracks executed migrations automatically and only runs new 
 We follow a **pragmatic testing strategy** that emphasizes real integration over mocking:
 
 #### Integration Tests for Features
+
 - **No mocks for repositories or database operations** - use real test database with clean slate approach
 - **Test complete workflows** - verify the entire feature flow from input to database changes
 - **Use Builder pattern** for test data creation via `[Entity]Builder.ts` files
@@ -181,12 +184,14 @@ We follow a **pragmatic testing strategy** that emphasizes real integration over
 The test suite uses a dedicated **ouafouaf_test** database that provides complete isolation from development data:
 
 #### Database Management
+
 - **Separate test database**: `ouafouaf_test` (completely isolated from development database)
 - **Clean slate approach**: Database is cleared before each test using table truncation
 - **Test utilities**: Located in `src/shared/test-utils/` for consistent test infrastructure
 - **Automatic setup**: Vitest handles database setup/teardown via global setup files
 
 #### Test Database Commands
+
 ```bash
 # Set up test database (first time only)
 pnpm db:test:setup
@@ -199,6 +204,7 @@ pnpm test
 ```
 
 #### Test Structure Pattern
+
 All feature integration tests MUST follow this pattern for consistent, isolated testing:
 
 ```typescript
@@ -261,6 +267,7 @@ describe('Feature Integration Tests', () => {
 ```
 
 #### Unit Tests for Entities
+
 - **Pure business logic testing** - test domain rules, validation, and entity behavior
 - **Value object validation** - test all edge cases for email, password, etc.
 - **No external dependencies** - entities should be testable in isolation
@@ -278,6 +285,7 @@ it('should create user with valid data', async () => {
 ```
 
 ### Test Infrastructure Files
+
 - `src/shared/test-utils/database-utils.ts` - Database setup, cleanup, and teardown functions
 - `src/shared/test-utils/setup.ts` - Per-test database clearing and environment setup
 - `src/shared/test-utils/global-setup.ts` - Global test environment setup and teardown
@@ -298,7 +306,6 @@ pnpm test
 pnpm build
 ```
 
-
 ## Local Development Setup
 
 ```bash
@@ -317,16 +324,17 @@ pnpm dev
 # - API Documentation: http://localhost:4000/docs
 ```
 
-
 ## Production Deployment
 
 **Vercel Setup:**
+
 - Frontend app: Deploy from `apps/web` directory
 - API app: Deploy from `apps/api` directory
 - Configure Vercel Postgres for production database
 - Set environment variables for database connections
 
 **Environment Variables:**
+
 - `DATABASE_URL` - PostgreSQL connection string
 - `JWT_SECRET` - Secure random string for JWT signing (**REQUIRED**)
 - `NODE_ENV` - Set to 'production' for production builds

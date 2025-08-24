@@ -31,11 +31,11 @@ describe('Authenticate User Feature - Integration Tests', () => {
         return await authenticateUser(
           {
             email: 'test@example.com',
-            password: 'validpassword123'
+            password: 'validpassword123',
           },
           {
             userRepository,
-            eventRepository
+            eventRepository,
           }
         );
       });
@@ -52,7 +52,9 @@ describe('Authenticate User Feature - Integration Tests', () => {
 
         expect(updatedUser).toBeTruthy();
         expect(updatedUser!.lastLogin).toBeInstanceOf(Date);
-        expect(updatedUser!.lastLogin!.getTime()).toBeGreaterThan(Date.now() - 5000); // Within last 5 seconds
+        expect(updatedUser!.lastLogin!.getTime()).toBeGreaterThan(
+          Date.now() - 5000
+        ); // Within last 5 seconds
       });
 
       // Assert - verify domain event was published
@@ -73,10 +75,10 @@ describe('Authenticate User Feature - Integration Tests', () => {
         return await authenticateUser(
           {
             email: 'test@example.com',
-            password: 'validpassword123'
+            password: 'validpassword123',
           },
           {
-            userRepository
+            userRepository,
             // No event repository
           }
         );
@@ -97,55 +99,60 @@ describe('Authenticate User Feature - Integration Tests', () => {
 
   describe('validation failures', () => {
     it('should fail with invalid email', async () => {
-      await expect(withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
+      await expect(
+        withTransaction(async (trx) => {
+          const userRepository = new UserRepository(trx);
 
-        return await authenticateUser(
-          {
-            email: 'invalid-email',
-            password: 'validpassword123'
-          },
-          {
-            userRepository
-          }
-        );
-      })).rejects.toThrow('Invalid email format');
+          return await authenticateUser(
+            {
+              email: 'invalid-email',
+              password: 'validpassword123',
+            },
+            {
+              userRepository,
+            }
+          );
+        })
+      ).rejects.toThrow('Invalid email format');
     });
-
   });
 
   describe('authentication failures', () => {
     it('should fail when user not found', async () => {
-      await expect(withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
+      await expect(
+        withTransaction(async (trx) => {
+          const userRepository = new UserRepository(trx);
 
-        return await authenticateUser(
-          {
-            email: 'nonexistent@example.com',
-            password: 'anypassword'
-          },
-          {
-            userRepository
-          }
-        );
-      })).rejects.toThrow('Invalid credentials');
+          return await authenticateUser(
+            {
+              email: 'nonexistent@example.com',
+              password: 'anypassword',
+            },
+            {
+              userRepository,
+            }
+          );
+        })
+      ).rejects.toThrow('Invalid credentials');
     });
 
     it('should fail with incorrect password', async () => {
       // testUser is already created in beforeEach, just test with wrong password
-      await expect(withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
+      await expect(
+        withTransaction(async (trx) => {
+          const userRepository = new UserRepository(trx);
 
-        return await authenticateUser(
-          {
-            email: 'test@example.com',
-            password: 'wrongpassword'
-          },
-          {
-            userRepository
-          }
-        );
-      })).rejects.toThrow('Invalid credentials');
+          return await authenticateUser(
+            {
+              email: 'test@example.com',
+              password: 'wrongpassword',
+            },
+            {
+              userRepository,
+            }
+          );
+        })
+      ).rejects.toThrow('Invalid credentials');
     });
   });
 
@@ -156,37 +163,41 @@ describe('Authenticate User Feature - Integration Tests', () => {
       // take similar time due to the dummy bcrypt operation
 
       const startTime1 = Date.now();
-      await expect(withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
+      await expect(
+        withTransaction(async (trx) => {
+          const userRepository = new UserRepository(trx);
 
-        return await authenticateUser(
-          {
-            email: 'nonexistent@example.com',
-            password: 'anypassword'
-          },
-          {
-            userRepository
-          }
-        );
-      })).rejects.toThrow('Invalid credentials');
+          return await authenticateUser(
+            {
+              email: 'nonexistent@example.com',
+              password: 'anypassword',
+            },
+            {
+              userRepository,
+            }
+          );
+        })
+      ).rejects.toThrow('Invalid credentials');
       const duration1 = Date.now() - startTime1;
 
       // testUser is already created in beforeEach
 
       const startTime2 = Date.now();
-      await expect(withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
+      await expect(
+        withTransaction(async (trx) => {
+          const userRepository = new UserRepository(trx);
 
-        return await authenticateUser(
-          {
-            email: 'test@example.com',
-            password: 'wrongpassword'
-          },
-          {
-            userRepository
-          }
-        );
-      })).rejects.toThrow('Invalid credentials');
+          return await authenticateUser(
+            {
+              email: 'test@example.com',
+              password: 'wrongpassword',
+            },
+            {
+              userRepository,
+            }
+          );
+        })
+      ).rejects.toThrow('Invalid credentials');
       const duration2 = Date.now() - startTime2;
 
       // Both should take at least 50ms (bcrypt time) and be within reasonable range of each other

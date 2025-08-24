@@ -9,7 +9,11 @@ import { loginSchema, type LoginFormData } from '../../schemas/auth-schemas';
 export function LoginForm() {
   const { login, isLoggingIn, loginError, resetLoginError } = useAuth();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
@@ -64,11 +68,7 @@ export function LoginForm() {
           )}
         </div>
 
-        {loginError && (
-          <Alert variant="error">
-            {loginError.message}
-          </Alert>
-        )}
+        {loginError && <Alert variant="error">{loginError.message}</Alert>}
 
         <Button
           type="submit"

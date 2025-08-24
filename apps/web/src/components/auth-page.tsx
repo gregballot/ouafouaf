@@ -1,4 +1,4 @@
-import { AuthTabs } from './auth'
+import { AuthTabs } from './auth';
 
 export function AuthPage() {
   return (
@@ -11,5 +11,5 @@ export function AuthPage() {
         <AuthTabs />
       </div>
     </div>
-  )
+  );
 }

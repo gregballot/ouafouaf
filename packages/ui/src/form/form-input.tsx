@@ -2,7 +2,8 @@ import { InputHTMLAttributes, forwardRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useFormField } from './form-field';
 
-export interface FormInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'name'> {
+export interface FormInputProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'name'> {
   className?: string;
 }
 
@@ -11,7 +12,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
     const { name, id } = useFormField();
     const {
       register,
-      formState: { errors }
+      formState: { errors },
     } = useFormContext();
 
     const error = errors[name];

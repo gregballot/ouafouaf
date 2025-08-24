@@ -5,7 +5,10 @@ import { isDomainError } from './errors';
 export function registerErrorHandler(fastify: FastifyInstance) {
   fastify.setErrorHandler(async (error: FastifyError, request, reply) => {
     // Log the error for debugging
-    fastify.log.error({ error, url: request.url, method: request.method }, 'Request error');
+    fastify.log.error(
+      { error, url: request.url, method: request.method },
+      'Request error'
+    );
 
     // Handle domain errors
     if (isDomainError(error)) {
@@ -18,8 +21,8 @@ export function registerErrorHandler(fastify: FastifyInstance) {
         error: {
           message: 'Validation failed',
           code: 'VALIDATION_ERROR',
-          details: error.validation
-        }
+          details: error.validation,
+        },
       });
     }
 
@@ -28,8 +31,8 @@ export function registerErrorHandler(fastify: FastifyInstance) {
       return reply.status(error.statusCode).send({
         error: {
           message: error.message,
-          code: 'REQUEST_ERROR'
-        }
+          code: 'REQUEST_ERROR',
+        },
       });
     }
 
@@ -38,15 +41,13 @@ export function registerErrorHandler(fastify: FastifyInstance) {
     return reply.status(500).send({
       error: {
         message: 'Internal server error',
-        code: 'INTERNAL_SERVER_ERROR'
-      }
+        code: 'INTERNAL_SERVER_ERROR',
+      },
     });
   });
 }
 
 // Helper function to throw async errors in routes
-export async function asyncHandler<T>(
-  fn: () => Promise<T>
-): Promise<T> {
+export async function asyncHandler<T>(fn: () => Promise<T>): Promise<T> {
   return await fn();
 }

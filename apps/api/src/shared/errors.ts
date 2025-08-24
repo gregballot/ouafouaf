@@ -4,7 +4,10 @@ export abstract class DomainError extends Error {
   abstract readonly code: string;
   abstract readonly httpStatus: number;
 
-  constructor(message: string, public readonly details?: any) {
+  constructor(
+    message: string,
+    public readonly details?: any
+  ) {
     super(message);
     this.name = this.constructor.name;
   }
@@ -14,8 +17,8 @@ export abstract class DomainError extends Error {
       error: {
         message: this.message,
         code: this.code,
-        ...(this.details && { details: this.details })
-      }
+        ...(this.details && { details: this.details }),
+      },
     };
   }
 }

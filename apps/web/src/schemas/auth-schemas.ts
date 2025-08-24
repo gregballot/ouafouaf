@@ -16,14 +16,20 @@ export const passwordSchema = z
   .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/[0-9]/, 'Password must contain at least one number')
-  .regex(/[^a-zA-Z0-9]/, 'Password must contain at least one special character');
+  .regex(
+    /[^a-zA-Z0-9]/,
+    'Password must contain at least one special character'
+  );
 
 // Name validation schema
 export const nameSchema = z
   .string()
   .min(1, 'Name is required')
   .max(100, 'Name must be less than 100 characters long')
-  .regex(/^[a-zA-Z\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes')
+  .regex(
+    /^[a-zA-Z\s'-]+$/,
+    'Name can only contain letters, spaces, hyphens, and apostrophes'
+  )
   .transform((name) => name.trim());
 
 // Login form schema
@@ -36,30 +42,33 @@ export const loginSchema = z.object({
 });
 
 // Signup form schema
-export const signupSchema = z.object({
-  name: nameSchema,
-  email: emailSchema,
-  password: passwordSchema,
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"], // Point error to confirmPassword field
-});
+export const signupSchema = z
+  .object({
+    name: nameSchema,
+    email: emailSchema,
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'], // Point error to confirmPassword field
+  });
 
 // Password change schema
-export const changePasswordSchema = z.object({
-  currentPassword: z
-    .string()
-    .min(1, 'Current password is required'),
-  newPassword: passwordSchema,
-  confirmNewPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmNewPassword, {
-  message: "New passwords don't match",
-  path: ["confirmNewPassword"],
-}).refine((data) => data.currentPassword !== data.newPassword, {
-  message: "New password must be different from current password",
-  path: ["newPassword"],
-});
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: passwordSchema,
+    confirmNewPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "New passwords don't match",
+    path: ['confirmNewPassword'],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: 'New password must be different from current password',
+    path: ['newPassword'],
+  });
 
 // Forgot password schema
 export const forgotPasswordSchema = z.object({
@@ -67,14 +76,16 @@ export const forgotPasswordSchema = z.object({
 });
 
 // Reset password schema
-export const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Reset token is required'),
-  password: passwordSchema,
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, 'Reset token is required'),
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 // Type exports
 export type LoginFormData = z.infer<typeof loginSchema>;
@@ -93,7 +104,9 @@ export const validateEmail = (email: string): boolean => {
   }
 };
 
-export const validatePassword = (password: string): { isValid: boolean; errors: string[] } => {
+export const validatePassword = (
+  password: string
+): { isValid: boolean; errors: string[] } => {
   try {
     passwordSchema.parse(password);
     return { isValid: true, errors: [] };
@@ -109,7 +122,9 @@ export const validatePassword = (password: string): { isValid: boolean; errors: 
 };
 
 // Password strength checker
-export const getPasswordStrength = (password: string): {
+export const getPasswordStrength = (
+  password: string
+): {
   score: number; // 0-4
   feedback: string[];
 } => {

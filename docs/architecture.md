@@ -5,18 +5,23 @@ This document outlines our pragmatic approach to DDD and Hexagonal Architecture,
 ## Core Principles
 
 ### Subdomain-First Organization
+
 Organize code by business domains (bounded contexts) rather than technical layers. Each subdomain contains all related business logic, data access, and domain concepts.
 
 ### Type-Safe Database Access
+
 Use Kysely for type-safe SQL queries with full TypeScript integration. Database schema types are centrally defined and provide compile-time safety.
 
 ### Domain Error Management
+
 Use custom domain errors that automatically map to HTTP status codes. Features throw specific errors instead of returning Result objects, making the code cleaner and more direct.
 
 ### Simplified Dependency Management
+
 Use direct instantiation in route handlers rather than complex DI containers. Dependencies are clear and traceable.
 
 ### Transaction-Per-Feature Pattern
+
 Each feature function executes within its own database transaction using `withTransaction()`. This ensures atomic operations and automatic rollback on errors.
 
 ## Directory Structure
@@ -55,6 +60,7 @@ src/
 ## Entity Design Patterns
 
 ### Entity Structure
+
 ```typescript
 // domain/[Subdomain]/[Entity].ts
 
@@ -140,6 +146,7 @@ export class [Entity] {
 ```
 
 ### Key Patterns
+
 - **Private constructors** with static `create()` factory methods
 - **Typed object parameters** for maintainable entity creation
 - **Direct exception throwing** for clean error handling
@@ -150,6 +157,7 @@ export class [Entity] {
 ## Repository Pattern
 
 ### Repository Interface
+
 ```typescript
 // domain/[Subdomain]/[Entity]Repository.ts
 export class [Entity]Repository {
@@ -242,6 +250,7 @@ export class [Entity]Repository {
 ```
 
 ### Key Patterns
+
 - **Transaction injection** with Kysely types in constructor
 - **Smart save method** handles create/update logic
 - **Direct exception throwing** for error handling
@@ -253,6 +262,7 @@ export class [Entity]Repository {
 ## Feature Functions
 
 ### Feature Structure
+
 ```typescript
 // domain/[Subdomain]/features/[feature-name].ts
 import { logger } from '../../../lib/logger';
@@ -318,6 +328,7 @@ export async function [featureName](
 ```
 
 ### Key Patterns
+
 - **Typed interfaces** for input, dependencies, and return types
 - **Direct exception throwing** for clean error handling
 - **Value object validation** early in the function (throws on error)
@@ -328,6 +339,7 @@ export async function [featureName](
 ## Event Architecture
 
 ### Domain Events
+
 ```typescript
 // domain/[Subdomain]/event.ts
 import { DomainEvent } from '../DomainEvent/DomainEvent';
@@ -351,6 +363,7 @@ export type [Subdomain]Events = [Entity][Action] | [Entity][OtherAction];
 ```
 
 ### Base Domain Event Interface
+
 ```typescript
 // domain/DomainEvent/DomainEvent.ts
 export interface DomainEvent {
@@ -361,6 +374,7 @@ export interface DomainEvent {
 ```
 
 ### Event Infrastructure
+
 ```typescript
 // domain/DomainEvent/index.ts
 import { [Subdomain]Events } from '../[Subdomain]/event';
@@ -377,6 +391,7 @@ export * from '../[Subdomain]/event';
 ## Testing Patterns
 
 ### Entity Unit Tests
+
 ```typescript
 // domain/[Subdomain]/[Entity].test.ts
 describe('[Entity]', () => {
@@ -414,7 +429,7 @@ describe('[Entity]', () => {
       expect(state).toMatchObject({
         id: expect.any(String),
         property: 'expected-value',
-        createdAt: expect.any(Date)
+        createdAt: expect.any(Date),
       });
     });
   });
@@ -426,12 +441,14 @@ describe('[Entity]', () => {
 We use a **clean slate testing approach** with a dedicated test database:
 
 #### Test Database Philosophy
+
 - **Complete isolation**: Tests use `ouafouaf_test` database, completely separate from development data
 - **Clean slate per test**: Each test starts with an empty database and creates its own test data
 - **Real database operations**: No mocking of repositories or database operations
 - **Test utilities**: Centralized test infrastructure in `src/shared/test-utils/`
 
 #### Test Structure Pattern
+
 ```typescript
 // domain/[Subdomain]/features/[feature-name].test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -492,19 +509,22 @@ describe('Authenticate User Feature - Integration Tests', () => {
   });
 
   it('should fail with invalid credentials', async () => {
-    await expect(withTransaction(async (trx) => {
-      const userRepository = new UserRepository(trx);
+    await expect(
+      withTransaction(async (trx) => {
+        const userRepository = new UserRepository(trx);
 
-      return await authenticateUser(
-        { email: 'test@example.com', password: 'wrongpassword' },
-        { userRepository }
-      );
-    })).rejects.toThrow('Invalid credentials');
+        return await authenticateUser(
+          { email: 'test@example.com', password: 'wrongpassword' },
+          { userRepository }
+        );
+      })
+    ).rejects.toThrow('Invalid credentials');
   });
 });
 ```
 
 #### Key Testing Patterns
+
 - **beforeEach setup**: Create fresh test data for each test using `withTransaction()`
 - **Multiple transaction contexts**: Separate transactions for setup, execution, and verification
 - **Complete workflow testing**: Test the entire feature flow from input to database state
@@ -513,6 +533,7 @@ describe('Authenticate User Feature - Integration Tests', () => {
 - **Builder pattern**: Use entity builders for consistent test data creation
 
 ### Builder Pattern
+
 ```typescript
 // domain/[Subdomain]/[Entity]Builder.ts
 export class [Entity]Builder {
@@ -548,6 +569,7 @@ export class [Entity]Builder {
 ## Route Handler Pattern
 
 ### HTTP Routes
+
 ```typescript
 // routes/[resource].ts
 export async function [resource]Routes(fastify: FastifyInstance) {
@@ -592,6 +614,7 @@ export async function [resource]Routes(fastify: FastifyInstance) {
 ## Transaction Management
 
 ### Fastify Hooks Setup
+
 ```typescript
 // config/database.ts or similar
 fastify.addHook('onRequest', async (request) => {
@@ -614,6 +637,7 @@ fastify.addHook('onError', async (request, reply, error) => {
 ## Logging Architecture
 
 ### Singleton Logger Pattern
+
 Instead of injecting logger dependencies into feature functions, we use a singleton logger service that can be initialized with the appropriate logger implementation.
 
 ```typescript
@@ -653,6 +677,7 @@ export const logger = LoggerService.getInstance();
 ```
 
 ### Usage in Features
+
 ```typescript
 // In server initialization
 logger.initialize(fastify.log);
@@ -664,12 +689,16 @@ export async function someFeature() {
   try {
     await eventRepository.publish(event);
   } catch (error) {
-    logger.error('Failed to publish event:', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Failed to publish event:',
+      error instanceof Error ? error : new Error(String(error))
+    );
   }
 }
 ```
 
 ### Key Benefits
+
 - **No dependency injection noise** - features stay clean
 - **Centralized logging** - consistent across the application
 - **Testable** - can be mocked for tests
@@ -678,6 +707,7 @@ export async function someFeature() {
 ## Database Access with Kysely
 
 ### Schema Types
+
 Define database schema types centrally for type safety across all queries:
 
 ```typescript
@@ -698,6 +728,7 @@ export interface Database {
 ```
 
 ### Repository Pattern with Kysely
+
 ```typescript
 // domain/User/UserRepository.ts
 import { Kysely, Transaction } from 'kysely';
@@ -722,7 +753,7 @@ export class UserRepository {
           email: state.email,
           password_hash: state.passwordHash,
           updated_at: state.updatedAt,
-          last_login: state.lastLogin
+          last_login: state.lastLogin,
         })
         .where('id', '=', state.id)
         .execute();
@@ -735,7 +766,7 @@ export class UserRepository {
           password_hash: state.passwordHash,
           created_at: state.createdAt,
           updated_at: state.updatedAt,
-          last_login: state.lastLogin
+          last_login: state.lastLogin,
         })
         .execute();
     }
@@ -746,6 +777,7 @@ export class UserRepository {
 ```
 
 ### Transaction Management
+
 ```typescript
 // routes/auth.ts
 import { withTransaction } from '../shared/transaction';
@@ -767,6 +799,7 @@ export async function authRoutes(fastify: FastifyInstance) {
 ## Domain Error Management
 
 ### Error Hierarchy
+
 ```typescript
 // shared/errors.ts
 export abstract class DomainError extends Error {
@@ -777,8 +810,8 @@ export abstract class DomainError extends Error {
     return {
       error: {
         message: this.message,
-        code: this.code
-      }
+        code: this.code,
+      },
     };
   }
 }
@@ -794,6 +827,7 @@ export class UserAlreadyExistsError extends DomainError {
 ```
 
 ### Feature Error Handling
+
 Features now throw domain errors instead of returning Result objects:
 
 ```typescript
@@ -813,6 +847,7 @@ export async function registerUser(
 ```
 
 ### Global Error Handler
+
 ```typescript
 // shared/error-handler.ts
 export function registerErrorHandler(fastify: FastifyInstance) {
@@ -829,26 +864,31 @@ export function registerErrorHandler(fastify: FastifyInstance) {
 ## Code Quality Guidelines
 
 ### Domain Encapsulation
+
 - **Never expose internal state**: Domain entities should not expose their internal structure via `getInternalState()` to API responses
 - **Public interfaces**: Create dedicated getters or `details` properties for external consumption
 - **Example**: `user.details` instead of `user.getInternalState()` in API responses
 
 ### Dependency Injection Patterns
+
 - **Simple naming**: Use `Dependencies` instead of verbose exported names like `FeatureFunctionDependencies`
 - **Internal types**: Keep dependency interfaces internal to feature modules - don't export them unless needed elsewhere
 - **Clean signatures**: Feature functions should accept simple, focused dependency objects
 
 ### Testing Patterns
+
 - **Shared test setup**: Use `beforeEach` to initialize transaction, repositories, and test data
 - **Global test variables**: Declare shared test variables (transaction, repositories, test entities) at the describe block level
 - **Avoid repetition**: Don't recreate the same test users/repositories in every test - set them up once per test suite
 
 ### Entity State Management
+
 - **In-place updates**: Entity methods like `updateLastLogin()` should modify the entity state directly, not return new instances
 - **Consistency**: Keep state management patterns consistent across all entities
 - **Testing**: Update tests to expect mutation rather than immutability
 
 ### Configuration Organization
+
 - **Separation of concerns**: Extract complex configuration (Swagger, CORS, etc.) into focused, single-purpose files
 - **Environment-driven**: Make all environment-dependent values configurable through environment variables
 - **No hardcoding**: Avoid hardcoded URLs, database credentials, or other deployment-specific values

@@ -15,25 +15,14 @@ export function Button({
   className = '',
   ...props
 }: ButtonProps) {
-  const classes = [
-    'btn',
-    `btn--${variant}`,
-    `btn--${size}`,
-    className
-  ].filter(Boolean).join(' ');
+  const classes = ['btn', `btn--${variant}`, `btn--${size}`, className]
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <button
-      className={classes}
-      disabled={disabled || isLoading}
-      {...props}
-    >
-      {isLoading && (
-        <div className="btn__spinner">⟳</div>
-      )}
-      <span className={isLoading ? 'btn__text--loading' : ''}>
-        {children}
-      </span>
+    <button className={classes} disabled={disabled || isLoading} {...props}>
+      {isLoading && <div className="btn__spinner">⟳</div>}
+      <span className={isLoading ? 'btn__text--loading' : ''}>{children}</span>
     </button>
   );
 }

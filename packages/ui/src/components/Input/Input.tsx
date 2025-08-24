@@ -3,7 +3,8 @@ import { colors } from '../../tokens/colors';
 import { spacing, radius } from '../../tokens/spacing';
 import { fontSize, fontWeight } from '../../tokens/typography';
 
-export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+export interface InputProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'error' | 'success';
   leftIcon?: React.ReactNode;
@@ -108,8 +109,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         color: colors.neutral[500],
         cursor: 'not-allowed',
       }),
-      ...(leftIcon && { paddingLeft: `calc(${sizeStyles.padding.split(' ')[1]} + 1.5rem)` }),
-      ...(rightIcon && { paddingRight: `calc(${sizeStyles.padding.split(' ')[1]} + 1.5rem)` }),
+      ...(leftIcon && {
+        paddingLeft: `calc(${sizeStyles.padding.split(' ')[1]} + 1.5rem)`,
+      }),
+      ...(rightIcon && {
+        paddingRight: `calc(${sizeStyles.padding.split(' ')[1]} + 1.5rem)`,
+      }),
       ...style,
     };
 
@@ -160,7 +165,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             disabled={disabled}
             aria-invalid={error ? 'true' : 'false'}
             aria-describedby={
-              error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined
+              error
+                ? `${inputId}-error`
+                : helperText
+                  ? `${inputId}-helper`
+                  : undefined
             }
             className={className}
             {...props}

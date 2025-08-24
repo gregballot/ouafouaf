@@ -11,7 +11,7 @@ async function setupDatabase() {
     port: 5432,
     user: 'postgres',
     password: 'postgres',
-    database: 'postgres'
+    database: 'postgres',
   });
 
   try {
@@ -19,12 +19,15 @@ async function setupDatabase() {
     console.log('📦 Connected to PostgreSQL server');
 
     // Determine which database to create based on DATABASE_URL
-    const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/ouafouaf';
+    const databaseUrl =
+      process.env.DATABASE_URL ||
+      'postgresql://postgres:postgres@localhost:5432/ouafouaf';
     const dbName = new URL(databaseUrl).pathname.slice(1); // Remove leading slash
 
     // Check if database exists
     const { rows } = await adminClient.query(
-      `SELECT 1 FROM pg_database WHERE datname = $1`, [dbName]
+      `SELECT 1 FROM pg_database WHERE datname = $1`,
+      [dbName]
     );
 
     if (rows.length === 0) {
@@ -33,7 +36,6 @@ async function setupDatabase() {
     } else {
       console.log(`✅ Database ${dbName} already exists`);
     }
-
   } catch (error) {
     console.error('💥 Setup failed:', error.message);
     process.exit(1);

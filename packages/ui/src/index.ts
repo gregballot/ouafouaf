@@ -15,7 +15,7 @@ export {
   type FormLabelProps,
   type FormInputProps,
   type FormErrorProps,
-  type FormHelpProps
+  type FormHelpProps,
 } from './form';
 
 // Design tokens

@@ -6,19 +6,11 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className = '', error = false, ...props }, ref) => {
-    const classes = [
-      'form-input',
-      error ? 'form-input--error' : '',
-      className
-    ].filter(Boolean).join(' ');
+    const classes = ['form-input', error ? 'form-input--error' : '', className]
+      .filter(Boolean)
+      .join(' ');
 
-    return (
-      <input
-        className={classes}
-        ref={ref}
-        {...props}
-      />
-    );
+    return <input className={classes} ref={ref} {...props} />;
   }
 );
 

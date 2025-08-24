@@ -175,12 +175,7 @@ export function Alert({
   };
 
   return (
-    <div
-      role="alert"
-      style={alertStyle}
-      className={className}
-      {...props}
-    >
+    <div role="alert" style={alertStyle} className={className} {...props}>
       <div style={iconStyle}>{icon}</div>
       <div style={contentStyle}>
         {title && <div style={titleStyle}>{title}</div>}

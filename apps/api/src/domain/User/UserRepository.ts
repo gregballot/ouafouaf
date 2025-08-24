@@ -4,7 +4,7 @@ import { User, Email } from './User';
 import {
   DatabaseError,
   UserNotFoundError,
-  UserAlreadyExistsError
+  UserAlreadyExistsError,
 } from '../../shared/errors';
 
 export class UserRepository {
@@ -29,7 +29,7 @@ export class UserRepository {
             email: state.email,
             password_hash: state.passwordHash,
             updated_at: state.updatedAt,
-            last_login: state.lastLogin
+            last_login: state.lastLogin,
           })
           .where('id', '=', state.id)
           .execute();
@@ -43,7 +43,7 @@ export class UserRepository {
             password_hash: state.passwordHash,
             created_at: state.createdAt,
             updated_at: state.updatedAt,
-            last_login: state.lastLogin
+            last_login: state.lastLogin,
           })
           .execute();
       }
@@ -65,7 +65,7 @@ export class UserRepository {
           'password_hash',
           'created_at',
           'updated_at',
-          'last_login'
+          'last_login',
         ])
         .where('id', '=', id)
         .executeTakeFirst();
@@ -80,7 +80,7 @@ export class UserRepository {
         passwordHash: row.password_hash,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        lastLogin: row.last_login
+        lastLogin: row.last_login,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -98,7 +98,7 @@ export class UserRepository {
           'password_hash',
           'created_at',
           'updated_at',
-          'last_login'
+          'last_login',
         ])
         .where('email', '=', email.toString())
         .executeTakeFirst();
@@ -113,11 +113,14 @@ export class UserRepository {
         passwordHash: row.password_hash,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        lastLogin: row.last_login
+        lastLogin: row.last_login,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new DatabaseError(`Failed to find user by email: ${message}`, error);
+      throw new DatabaseError(
+        `Failed to find user by email: ${message}`,
+        error
+      );
     }
   }
 

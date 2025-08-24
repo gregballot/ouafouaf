@@ -1,8 +1,5 @@
 import bcrypt from 'bcrypt';
-import {
-  InvalidEmailError,
-  InvalidPasswordError
-} from '../../shared/errors';
+import { InvalidEmailError, InvalidPasswordError } from '../../shared/errors';
 
 // Inline Value Objects - now throw errors instead of returning Results
 export class Email {
@@ -44,11 +41,15 @@ export class Password {
     }
 
     if (plaintext.length < 8) {
-      throw new InvalidPasswordError('Password must be at least 8 characters long');
+      throw new InvalidPasswordError(
+        'Password must be at least 8 characters long'
+      );
     }
 
     if (plaintext.length > 100) {
-      throw new InvalidPasswordError('Password must be less than 100 characters');
+      throw new InvalidPasswordError(
+        'Password must be less than 100 characters'
+      );
     }
 
     const hash = await bcrypt.hash(plaintext, 12);
@@ -120,7 +121,7 @@ export class User {
       password: params.password,
       createdAt: now,
       updatedAt: now,
-      lastLogin: null
+      lastLogin: null,
     });
   }
 
@@ -135,16 +136,26 @@ export class User {
       password,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
-      lastLogin: data.lastLogin
+      lastLogin: data.lastLogin,
     });
   }
 
   // Getters
-  get id(): string { return this.params.id; }
-  get email(): Email { return this.params.email; }
-  get createdAt(): Date { return this.params.createdAt; }
-  get updatedAt(): Date { return this.params.updatedAt; }
-  get lastLogin(): Date | null { return this.params.lastLogin; }
+  get id(): string {
+    return this.params.id;
+  }
+  get email(): Email {
+    return this.params.email;
+  }
+  get createdAt(): Date {
+    return this.params.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.params.updatedAt;
+  }
+  get lastLogin(): Date | null {
+    return this.params.lastLogin;
+  }
 
   // Business methods
   async authenticate(plaintext: string): Promise<boolean> {
@@ -164,7 +175,7 @@ export class User {
       email: this.params.email.toString(),
       created_at: this.params.createdAt.toISOString(),
       updated_at: this.params.updatedAt.toISOString(),
-      last_login: this.params.lastLogin?.toISOString()
+      last_login: this.params.lastLogin?.toISOString(),
     };
   }
 
@@ -176,7 +187,7 @@ export class User {
       passwordHash: this.params.password.getHash(),
       createdAt: this.params.createdAt,
       updatedAt: this.params.updatedAt,
-      lastLogin: this.params.lastLogin
+      lastLogin: this.params.lastLogin,
     };
   }
 }

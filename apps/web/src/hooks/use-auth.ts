@@ -3,7 +3,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient, ApiError } from '../lib/api-client';
 import type { AuthState } from '../lib/auth';
-import type { SignupRequestType, LoginRequestType, UserType } from '@repo/api-schemas';
+import type {
+  SignupRequestType,
+  LoginRequestType,
+  UserType,
+} from '@repo/api-schemas';
 
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
@@ -21,7 +25,9 @@ export function useAuth() {
     const initAuth = async () => {
       try {
         // Try to get current user from server (which will check httpOnly cookie)
-        const response = await apiClient.get<{ user: UserType }>('/api/auth/me');
+        const response = await apiClient.get<{ user: UserType }>(
+          '/api/auth/me'
+        );
         const user = response.user;
 
         setAuthState({

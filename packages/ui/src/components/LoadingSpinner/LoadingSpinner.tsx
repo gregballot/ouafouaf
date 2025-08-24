@@ -1,7 +1,8 @@
 import React from 'react';
 import { colors } from '../../tokens/colors';
 
-export interface LoadingSpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface LoadingSpinnerProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   color?: 'primary' | 'neutral' | 'current';
   label?: string;

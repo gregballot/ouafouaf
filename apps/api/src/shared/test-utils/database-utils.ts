@@ -15,7 +15,7 @@ export async function setupTestDatabase(): Promise<void> {
     port: 5432,
     user: 'postgres',
     password: 'postgres',
-    database: 'postgres'
+    database: 'postgres',
   });
 
   try {
@@ -31,9 +31,11 @@ export async function setupTestDatabase(): Promise<void> {
       await adminClient.query('CREATE DATABASE ouafouaf_test');
       console.log('🗄️  Created ouafouaf_test database');
     }
-
   } catch (error) {
-    console.error('💥 Test database setup failed:', error instanceof Error ? error.message : 'Unknown error');
+    console.error(
+      '💥 Test database setup failed:',
+      error instanceof Error ? error.message : 'Unknown error'
+    );
     throw error;
   } finally {
     await adminClient.end();
@@ -41,7 +43,9 @@ export async function setupTestDatabase(): Promise<void> {
 
   // The migrations will be handled by the global setup
   // For now, just inform that we need to run migrations manually
-  console.log('🚀 Test database ready - ensure migrations are run with `pnpm db:test:migrate`');
+  console.log(
+    '🚀 Test database ready - ensure migrations are run with `pnpm db:test:migrate`'
+  );
 }
 
 /**
@@ -59,13 +63,17 @@ export async function clearTestDatabase(): Promise<void> {
       await trx.deleteFrom('users').execute();
 
       // Reset sequences if they exist
-      await sql`SELECT setval(pg_get_serial_sequence('users', 'id'), 1, false)`.execute(trx).catch(() => {
-        // Ignore if sequence doesn't exist (UUID primary keys don't have sequences)
-      });
+      await sql`SELECT setval(pg_get_serial_sequence('users', 'id'), 1, false)`
+        .execute(trx)
+        .catch(() => {
+          // Ignore if sequence doesn't exist (UUID primary keys don't have sequences)
+        });
     });
-
   } catch (error) {
-    console.error('💥 Failed to clear test database:', error instanceof Error ? error.message : 'Unknown error');
+    console.error(
+      '💥 Failed to clear test database:',
+      error instanceof Error ? error.message : 'Unknown error'
+    );
     throw error;
   }
 }
@@ -85,7 +93,10 @@ export async function teardownTestDatabase(): Promise<void> {
       console.log('🔌 Database pool already closed or not initialized');
     }
   } catch (error) {
-    console.error('⚠️ Warning during test database teardown:', error instanceof Error ? error.message : 'Unknown error');
+    console.error(
+      '⚠️ Warning during test database teardown:',
+      error instanceof Error ? error.message : 'Unknown error'
+    );
     // Don't throw - this is cleanup
   }
 }

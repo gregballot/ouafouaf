@@ -31,11 +31,11 @@ describe('Register User Feature - Integration Tests', () => {
         return await registerUser(
           {
             email: 'test@example.com',
-            password: 'validpassword123'
+            password: 'validpassword123',
           },
           {
             userRepository,
-            eventRepository
+            eventRepository,
           }
         );
       });
@@ -71,10 +71,10 @@ describe('Register User Feature - Integration Tests', () => {
         return await registerUser(
           {
             email: 'test@example.com',
-            password: 'validpassword123'
+            password: 'validpassword123',
           },
           {
-            userRepository
+            userRepository,
             // No event repository
           }
         );
@@ -95,54 +95,60 @@ describe('Register User Feature - Integration Tests', () => {
 
   describe('validation failures', () => {
     it('should fail with invalid email', async () => {
-      await expect(withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
+      await expect(
+        withTransaction(async (trx) => {
+          const userRepository = new UserRepository(trx);
 
-        return await registerUser(
-          {
-            email: 'invalid-email',
-            password: 'validpassword123'
-          },
-          {
-            userRepository
-          }
-        );
-      })).rejects.toThrow('Invalid email format');
+          return await registerUser(
+            {
+              email: 'invalid-email',
+              password: 'validpassword123',
+            },
+            {
+              userRepository,
+            }
+          );
+        })
+      ).rejects.toThrow('Invalid email format');
     });
 
     it('should fail with invalid password', async () => {
-      await expect(withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
+      await expect(
+        withTransaction(async (trx) => {
+          const userRepository = new UserRepository(trx);
 
-        return await registerUser(
-          {
-            email: 'test@example.com',
-            password: 'short'
-          },
-          {
-            userRepository
-          }
-        );
-      })).rejects.toThrow('Password must be at least 8 characters long');
+          return await registerUser(
+            {
+              email: 'test@example.com',
+              password: 'short',
+            },
+            {
+              userRepository,
+            }
+          );
+        })
+      ).rejects.toThrow('Password must be at least 8 characters long');
     });
   });
 
   describe('business rule violations', () => {
     it('should fail when user already exists', async () => {
       // Act & Assert: Try to register with same email as existing user
-      await expect(withTransaction(async (trx) => {
-        const userRepository = new UserRepository(trx);
+      await expect(
+        withTransaction(async (trx) => {
+          const userRepository = new UserRepository(trx);
 
-        return await registerUser(
-          {
-            email: 'existing@example.com',
-            password: 'validpassword123'
-          },
-          {
-            userRepository
-          }
-        );
-      })).rejects.toThrow('User already exists');
+          return await registerUser(
+            {
+              email: 'existing@example.com',
+              password: 'validpassword123',
+            },
+            {
+              userRepository,
+            }
+          );
+        })
+      ).rejects.toThrow('User already exists');
     });
   });
 });

@@ -26,9 +26,7 @@ export function FormField({ children, name, className = '' }: FormFieldProps) {
 
   return (
     <FormFieldContext.Provider value={{ name, id }}>
-      <div className={`form-field ${className}`}>
-        {children}
-      </div>
+      <div className={`form-field ${className}`}>{children}</div>
     </FormFieldContext.Provider>
   );
 }

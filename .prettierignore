@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+.turbo/
+.vercel/
+
+# Generated files
+*.min.js
+*.min.css
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Environment files
+.env*
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# Storybook
+storybook-static/

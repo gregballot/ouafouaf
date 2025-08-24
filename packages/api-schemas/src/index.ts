@@ -5,7 +5,7 @@ export {
   User,
   type ErrorResponseType,
   type SuccessResponseType,
-  type UserType
+  type UserType,
 } from './common';
 
 // Auth schemas and types
@@ -19,5 +19,5 @@ export {
   type SignupRequestType,
   type LoginRequestType,
   type AuthResponseType,
-  type AuthErrorResponseType
+  type AuthErrorResponseType,
 } from './auth';

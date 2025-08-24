@@ -8,7 +8,8 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'A specialized card component designed for authentication forms. Provides consistent styling and layout for login/signup flows.',
+        component:
+          'A specialized card component designed for authentication forms. Provides consistent styling and layout for login/signup flows.',
       },
     },
   },
@@ -32,14 +33,26 @@ export const Default: Story = {
   args: {
     title: 'Welcome Back',
     subtitle: 'Sign in to your account',
-    children: <div style={{ padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }}>Card Content</div>,
+    children: (
+      <div
+        style={{ padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }}
+      >
+        Card Content
+      </div>
+    ),
   },
 };
 
 export const WithoutSubtitle: Story = {
   args: {
     title: 'Sign In',
-    children: <div style={{ padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }}>Card Content</div>,
+    children: (
+      <div
+        style={{ padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }}
+      >
+        Card Content
+      </div>
+    ),
   },
 };
 
@@ -50,27 +63,22 @@ export const LoginForm: Story = {
       subtitle="Sign in to continue to your account"
     >
       <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <AuthInput
-          label="Email"
-          type="email"
-          placeholder="Enter your email"
-        />
+        <AuthInput label="Email" type="email" placeholder="Enter your email" />
         <AuthInput
           label="Password"
           type="password"
           placeholder="Enter your password"
         />
         <AuthButton>Sign In</AuthButton>
-        <AuthButton variant="ghost">
-          Don't have an account? Sign up
-        </AuthButton>
+        <AuthButton variant="ghost">Don't have an account? Sign up</AuthButton>
       </form>
     </AuthCard>
   ),
   parameters: {
     docs: {
       description: {
-        story: 'Complete login form using AuthCard with AuthInput and AuthButton components.',
+        story:
+          'Complete login form using AuthCard with AuthInput and AuthButton components.',
       },
     },
   },
@@ -78,21 +86,14 @@ export const LoginForm: Story = {
 
 export const SignupForm: Story = {
   render: () => (
-    <AuthCard
-      title="Create Account"
-      subtitle="Sign up to get started"
-    >
+    <AuthCard title="Create Account" subtitle="Sign up to get started">
       <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <AuthInput
           label="Full Name"
           type="text"
           placeholder="Enter your full name"
         />
-        <AuthInput
-          label="Email"
-          type="email"
-          placeholder="Enter your email"
-        />
+        <AuthInput label="Email" type="email" placeholder="Enter your email" />
         <AuthInput
           label="Password"
           type="password"
@@ -113,7 +114,8 @@ export const SignupForm: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Complete signup form using AuthCard with multiple input fields.',
+        story:
+          'Complete signup form using AuthCard with multiple input fields.',
       },
     },
   },
@@ -121,10 +123,7 @@ export const SignupForm: Story = {
 
 export const WithError: Story = {
   render: () => (
-    <AuthCard
-      title="Sign In"
-      subtitle="Welcome back"
-    >
+    <AuthCard title="Sign In" subtitle="Welcome back">
       <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <AuthInput
           label="Email"

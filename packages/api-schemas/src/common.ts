@@ -5,13 +5,13 @@ export const ErrorResponse = Type.Object({
   error: Type.Object({
     message: Type.String(),
     code: Type.Optional(Type.String()),
-    details: Type.Optional(Type.Unknown())
-  })
+    details: Type.Optional(Type.Unknown()),
+  }),
 });
 
 export const SuccessResponse = Type.Object({
   success: Type.Literal(true),
-  message: Type.Optional(Type.String())
+  message: Type.Optional(Type.String()),
 });
 
 // User schema (matches database structure)
@@ -20,7 +20,7 @@ export const User = Type.Object({
   email: Type.String({ format: 'email' }),
   created_at: Type.String({ format: 'date-time' }),
   updated_at: Type.String({ format: 'date-time' }),
-  last_login: Type.Optional(Type.String({ format: 'date-time' }))
+  last_login: Type.Optional(Type.String({ format: 'date-time' })),
 });
 
 // Type exports

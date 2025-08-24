@@ -2,7 +2,7 @@ import type {
   SignupRequestType,
   LoginRequestType,
   AuthResponseType,
-  AuthErrorResponseType
+  AuthErrorResponseType,
 } from '@repo/api-schemas';
 
 export class ApiError extends Error {
@@ -57,11 +57,14 @@ class ApiClient {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string> || {}),
+      ...((options.headers as Record<string, string>) || {}),
     };
 
     // Add CSRF token for state-changing operations
-    if (csrfToken && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method || 'GET')) {
+    if (
+      csrfToken &&
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method || 'GET')
+    ) {
       headers['X-CSRF-Token'] = csrfToken;
     }
 
@@ -85,14 +88,20 @@ class ApiClient {
 
       if (!response.ok) {
         // Handle CSRF token expiration
-        if (response.status === 403 && data?.error?.code === 'CSRF_TOKEN_INVALID') {
+        if (
+          response.status === 403 &&
+          data?.error?.code === 'CSRF_TOKEN_INVALID'
+        ) {
           this.csrfToken = null; // Clear cached token
           // Retry the request once with new token
           return this.request<T>(endpoint, options);
         }
 
         const error = data as AuthErrorResponseType;
-        const errorDetails = error?.error && 'details' in error.error ? error.error.details : undefined;
+        const errorDetails =
+          error?.error && 'details' in error.error
+            ? error.error.details
+            : undefined;
         throw new ApiError(
           error?.error?.message || 'Request failed',
           response.status,
@@ -141,7 +150,11 @@ class ApiClient {
   }
 
   // Generic POST method
-  async post<T>(endpoint: string, data?: any, options: RequestInit = {}): Promise<T> {
+  async post<T>(
+    endpoint: string,
+    data?: any,
+    options: RequestInit = {}
+  ): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
@@ -150,7 +163,11 @@ class ApiClient {
   }
 
   // Generic PUT method
-  async put<T>(endpoint: string, data?: any, options: RequestInit = {}): Promise<T> {
+  async put<T>(
+    endpoint: string,
+    data?: any,
+    options: RequestInit = {}
+  ): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,

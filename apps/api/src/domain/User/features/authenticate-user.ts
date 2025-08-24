@@ -34,7 +34,10 @@ export async function authenticateUser(
     isValid = await user.authenticate(payload.password);
   } else {
     // prevent timing attacks
-    await bcrypt.compare(payload.password, '$2b$12$dummy.hash.to.prevent.timing.attacks.with.consistent.work.factor');
+    await bcrypt.compare(
+      payload.password,
+      '$2b$12$dummy.hash.to.prevent.timing.attacks.with.consistent.work.factor'
+    );
   }
 
   if (!user || !isValid) {
@@ -46,15 +49,16 @@ export async function authenticateUser(
   const savedUser = await userRepository.save(user);
   if (eventRepository) {
     try {
-      await eventRepository.publish(
-        new UserLoggedIn(savedUser.id)
-      );
+      await eventRepository.publish(new UserLoggedIn(savedUser.id));
     } catch (error) {
-      logger.error('Failed to publish UserLoggedIn event:', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Failed to publish UserLoggedIn event:',
+        error instanceof Error ? error : new Error(String(error))
+      );
     }
   }
 
   return {
-    user: savedUser
+    user: savedUser,
   };
 }

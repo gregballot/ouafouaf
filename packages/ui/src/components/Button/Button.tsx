@@ -3,7 +3,8 @@ import { colors } from '../../tokens/colors';
 import { spacing, radius } from '../../tokens/spacing';
 import { fontSize, fontWeight } from '../../tokens/typography';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'destructive';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
@@ -109,7 +110,8 @@ const buttonSizes = {
 };
 
 const LoadingSpinner = ({ size }: { size: 'sm' | 'md' | 'lg' }) => {
-  const spinnerSize = size === 'sm' ? '1rem' : size === 'md' ? '1.25rem' : '1.5rem';
+  const spinnerSize =
+    size === 'sm' ? '1rem' : size === 'md' ? '1.25rem' : '1.5rem';
 
   return (
     <svg

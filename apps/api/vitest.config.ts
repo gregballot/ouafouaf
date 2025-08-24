@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
@@ -19,8 +19,8 @@ export default defineConfig({
         'dist/',
         'src/**/*.test.ts',
         'src/**/*.d.ts',
-        'vitest.config.ts'
-      ]
+        'vitest.config.ts',
+      ],
     },
 
     // Test timeout for integration tests with database
@@ -36,8 +36,8 @@ export default defineConfig({
     pool: 'forks',
     poolOptions: {
       forks: {
-        singleFork: true
-      }
-    }
-  }
-})
+        singleFork: true,
+      },
+    },
+  },
+});

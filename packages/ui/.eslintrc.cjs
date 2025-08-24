@@ -1,4 +1,4 @@
 module.exports = {
   extends: ['../../.eslintrc.cjs', 'plugin:storybook/recommended'],
-  ignorePatterns: ['src/stories/**/*']
+  ignorePatterns: ['src/stories/**/*'],
 };

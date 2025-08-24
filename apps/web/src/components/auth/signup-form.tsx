@@ -5,14 +5,26 @@ import { Input } from '../ui/input';
 import { Alert } from '../ui/alert';
 import { PasswordStrength } from '../ui/password-strength';
 import { useAuth } from '../../hooks/use-auth';
-import { signupSchema, type SignupFormData, getPasswordStrength } from '../../schemas/auth-schemas';
+import {
+  signupSchema,
+  type SignupFormData,
+  getPasswordStrength,
+} from '../../schemas/auth-schemas';
 import { useState, useEffect } from 'react';
 
 export function SignupForm() {
   const { signup, isSigningUp, signupError, resetSignupError } = useAuth();
-  const [passwordStrength, setPasswordStrength] = useState<{ score: number; feedback: string[] }>({ score: 0, feedback: [] });
+  const [passwordStrength, setPasswordStrength] = useState<{
+    score: number;
+    feedback: string[];
+  }>({ score: 0, feedback: [] });
 
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<SignupFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       name: '',
@@ -39,7 +51,6 @@ export function SignupForm() {
     const { confirmPassword: _, ...signupData } = data;
     signup(signupData);
   };
-
 
   return (
     <div className="auth-form">
@@ -120,11 +131,7 @@ export function SignupForm() {
           )}
         </div>
 
-        {signupError && (
-          <Alert variant="error">
-            {signupError.message}
-          </Alert>
-        )}
+        {signupError && <Alert variant="error">{signupError.message}</Alert>}
 
         <Button
           type="submit"

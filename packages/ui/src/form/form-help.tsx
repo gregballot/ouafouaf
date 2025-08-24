@@ -6,15 +6,15 @@ export interface FormHelpProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-export function FormHelp({ children, className = '', ...props }: FormHelpProps) {
+export function FormHelp({
+  children,
+  className = '',
+  ...props
+}: FormHelpProps) {
   const { id } = useFormField();
 
   return (
-    <div
-      id={`${id}-help`}
-      className={`form-help ${className}`}
-      {...props}
-    >
+    <div id={`${id}-help`} className={`form-help ${className}`} {...props}>
       {children}
     </div>
   );

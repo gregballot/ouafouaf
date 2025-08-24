@@ -5,9 +5,7 @@ module.exports = {
     es6: true,
     node: true,
   },
-  extends: [
-    'eslint:recommended',
-  ],
+  extends: ['eslint:recommended', 'prettier'],
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
@@ -15,18 +13,18 @@ module.exports = {
       jsx: true,
     },
   },
+  plugins: ['prettier'],
   rules: {
     'no-unused-vars': 'error',
+    'prettier/prettier': 'error',
+    'eol-last': ['error', 'always'],
   },
   overrides: [
     {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint'],
-      extends: [
-        'eslint:recommended',
-        'plugin:@typescript-eslint/recommended',
-      ],
+      extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
       rules: {
         'no-unused-vars': 'off',
         '@typescript-eslint/no-unused-vars': 'error',

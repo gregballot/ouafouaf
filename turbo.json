@@ -4,12 +4,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist/**",
-        ".vercel/output/**"
-      ]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", ".vercel/output/**"]
     },
     "dev": {
       "dependsOn": ["^build"],
@@ -18,6 +13,10 @@
     },
     "lint": {
       "dependsOn": ["^lint"],
+      "inputs": ["$TURBO_DEFAULT$", "eslint.config.js"]
+    },
+    "lint:fix": {
+      "dependsOn": ["^lint:fix"],
       "inputs": ["$TURBO_DEFAULT$", "eslint.config.js"]
     },
     "type-check": {
@@ -32,13 +31,6 @@
       "cache": false
     }
   },
-  "globalEnv": [
-    "NODE_ENV",
-    "DATABASE_URL",
-    "JWT_SECRET"
-  ],
-  "globalDependencies": [
-    "tsconfig.json",
-    "package.json"
-  ]
+  "globalEnv": ["NODE_ENV", "DATABASE_URL", "JWT_SECRET"],
+  "globalDependencies": ["tsconfig.json", "package.json"]
 }

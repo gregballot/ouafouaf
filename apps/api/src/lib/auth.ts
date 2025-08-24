@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import type { UserType } from '@repo/api-schemas';
-import { env } from '../config/env'
+import { env } from '../config/env';
 
 const JWT_EXPIRES_IN = '7d';
 
@@ -8,18 +8,23 @@ export function generateToken(user: UserType): string {
   return jwt.sign(
     {
       userId: user.id,
-      email: user.email
+      email: user.email,
     },
     env.JWT_SECRET,
     {
-      expiresIn: JWT_EXPIRES_IN
+      expiresIn: JWT_EXPIRES_IN,
     }
   );
 }
 
-export function verifyToken(token: string): { userId: string; email: string } | null {
+export function verifyToken(
+  token: string
+): { userId: string; email: string } | null {
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { userId: string; email: string };
+    const decoded = jwt.verify(token, env.JWT_SECRET) as {
+      userId: string;
+      email: string;
+    };
     return decoded;
   } catch {
     return null;

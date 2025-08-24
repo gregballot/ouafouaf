@@ -7,7 +7,12 @@ export interface FormLabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
   className?: string;
 }
 
-export function FormLabel({ children, required = false, className = '', ...props }: FormLabelProps) {
+export function FormLabel({
+  children,
+  required = false,
+  className = '',
+  ...props
+}: FormLabelProps) {
   const { id } = useFormField();
 
   return (
@@ -17,7 +22,11 @@ export function FormLabel({ children, required = false, className = '', ...props
       {...props}
     >
       {children}
-      {required && <span className="form-label__required" aria-hidden="true">*</span>}
+      {required && (
+        <span className="form-label__required" aria-hidden="true">
+          *
+        </span>
+      )}
     </label>
   );
 }

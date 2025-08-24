@@ -1,8 +1,8 @@
-import { useAuth } from '../hooks/use-auth'
-import { Button } from './ui/button'
+import { useAuth } from '../hooks/use-auth';
+import { Button } from './ui/button';
 
 export function Home() {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuth();
 
   return (
     <div className="app">
@@ -19,5 +19,5 @@ export function Home() {
         </div>
       </div>
     </div>
-  )
+  );
 }

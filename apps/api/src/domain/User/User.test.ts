@@ -22,7 +22,9 @@ describe('User Domain Entity - Unit Tests', () => {
 
     describe('validation failures', () => {
       it('should throw with invalid format', () => {
-        expect(() => Email.create('invalid-email')).toThrow('Invalid email format');
+        expect(() => Email.create('invalid-email')).toThrow(
+          'Invalid email format'
+        );
       });
 
       it('should throw with empty string', () => {
@@ -34,7 +36,9 @@ describe('User Domain Entity - Unit Tests', () => {
       });
 
       it('should throw with undefined', () => {
-        expect(() => Email.create(undefined as any)).toThrow('Invalid email format');
+        expect(() => Email.create(undefined as any)).toThrow(
+          'Invalid email format'
+        );
       });
 
       it('should throw with too long email', () => {
@@ -81,24 +85,34 @@ describe('User Domain Entity - Unit Tests', () => {
 
     describe('validation failures', () => {
       it('should throw with short password', async () => {
-        await expect(Password.create('short')).rejects.toThrow('Password must be at least 8 characters long');
+        await expect(Password.create('short')).rejects.toThrow(
+          'Password must be at least 8 characters long'
+        );
       });
 
       it('should throw with empty password', async () => {
-        await expect(Password.create('')).rejects.toThrow('Password is required');
+        await expect(Password.create('')).rejects.toThrow(
+          'Password is required'
+        );
       });
 
       it('should throw with null password', async () => {
-        await expect(Password.create(null as any)).rejects.toThrow('Password is required');
+        await expect(Password.create(null as any)).rejects.toThrow(
+          'Password is required'
+        );
       });
 
       it('should throw with undefined password', async () => {
-        await expect(Password.create(undefined as any)).rejects.toThrow('Password is required');
+        await expect(Password.create(undefined as any)).rejects.toThrow(
+          'Password is required'
+        );
       });
 
       it('should throw with too long password', async () => {
         const longPassword = 'a'.repeat(101);
-        await expect(Password.create(longPassword)).rejects.toThrow('Password must be less than 100 characters');
+        await expect(Password.create(longPassword)).rejects.toThrow(
+          'Password must be less than 100 characters'
+        );
       });
     });
 
@@ -142,8 +156,12 @@ describe('User Domain Entity - Unit Tests', () => {
       });
 
       it('should throw with invalid hash', () => {
-        expect(() => Password.fromHash('')).toThrow('Password hash is required');
-        expect(() => Password.fromHash(null as any)).toThrow('Password hash is required');
+        expect(() => Password.fromHash('')).toThrow(
+          'Password hash is required'
+        );
+        expect(() => Password.fromHash(null as any)).toThrow(
+          'Password hash is required'
+        );
       });
     });
   });

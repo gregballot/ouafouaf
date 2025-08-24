@@ -30,6 +30,7 @@ Create environment variables in Vercel dashboard:
 
 1. Create a PostgreSQL database on Vercel Postgres
 2. Run the migration scripts:
+
    ```sql
    -- 001_init.sql
    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -67,11 +68,13 @@ Create environment variables in Vercel dashboard:
 ## Development vs Production
 
 ### Development
+
 - Uses Vite proxy for API calls (`VITE_API_URL` is empty)
 - Local PostgreSQL via Docker Compose
 - Hot reloading for both frontend and API
 
 ### Production
+
 - Direct API calls using `VITE_API_URL`
 - Vercel Postgres database
 - Serverless functions for API endpoints
@@ -86,6 +89,7 @@ Create environment variables in Vercel dashboard:
 ## Monitoring
 
 Both applications include:
+
 - Structured logging with appropriate log levels
 - Health check endpoints
 - Error handling and reporting

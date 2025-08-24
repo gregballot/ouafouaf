@@ -37,11 +37,14 @@ export async function registerUser(
         new UserRegistered(savedUser.id, savedUser.email.toString())
       );
     } catch (error) {
-      logger.error('Failed to publish UserRegistered event:', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Failed to publish UserRegistered event:',
+        error instanceof Error ? error : new Error(String(error))
+      );
     }
   }
 
   return {
-    user: savedUser
+    user: savedUser,
   };
 }

@@ -6,7 +6,9 @@ const { Client } = pg;
 
 async function resetDatabase() {
   const client = new Client({
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/ouafouaf'
+    connectionString:
+      process.env.DATABASE_URL ||
+      'postgresql://postgres:postgres@localhost:5432/ouafouaf',
   });
 
   try {
@@ -31,7 +33,6 @@ async function resetDatabase() {
 
     console.log('🗑️  Dropped all tables');
     console.log('✅ Database reset complete');
-
   } catch (error) {
     console.error('💥 Reset failed:', error.message);
     process.exit(1);

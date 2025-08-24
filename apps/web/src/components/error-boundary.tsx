@@ -14,7 +14,10 @@ interface ErrorBoundaryProps {
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -55,7 +58,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         return this.props.fallback(this.state.error, this.retry);
       }
 
-      return <DefaultErrorFallback error={this.state.error} retry={this.retry} />;
+      return (
+        <DefaultErrorFallback error={this.state.error} retry={this.retry} />
+      );
     }
 
     return this.props.children;
@@ -71,12 +76,14 @@ function DefaultErrorFallback({ error, retry }: DefaultErrorFallbackProps) {
   const isDevelopment = import.meta.env.DEV;
 
   return (
-    <div style={{
-      padding: '2rem',
-      maxWidth: '600px',
-      margin: '2rem auto',
-      textAlign: 'center'
-    }}>
+    <div
+      style={{
+        padding: '2rem',
+        maxWidth: '600px',
+        margin: '2rem auto',
+        textAlign: 'center',
+      }}
+    >
       <Alert variant="error">
         <div className="font-semibold mb-2">Something went wrong</div>
         <div style={{ marginBottom: '1rem' }}>
@@ -84,36 +91,42 @@ function DefaultErrorFallback({ error, retry }: DefaultErrorFallbackProps) {
         </div>
 
         {isDevelopment && (
-          <details style={{
-            marginTop: '1rem',
-            textAlign: 'left',
-            padding: '1rem',
-            backgroundColor: '#f5f5f5',
-            borderRadius: '4px',
-            fontSize: '0.875rem'
-          }}>
+          <details
+            style={{
+              marginTop: '1rem',
+              textAlign: 'left',
+              padding: '1rem',
+              backgroundColor: '#f5f5f5',
+              borderRadius: '4px',
+              fontSize: '0.875rem',
+            }}
+          >
             <summary style={{ cursor: 'pointer', marginBottom: '0.5rem' }}>
               Error Details (Development Only)
             </summary>
-            <pre style={{
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              margin: 0
-            }}>
+            <pre
+              style={{
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                margin: 0,
+              }}
+            >
               {error.message}
               {error.stack && `\n\n${error.stack}`}
             </pre>
           </details>
         )}
 
-        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <Button onClick={retry}>
-            Try Again
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => window.location.reload()}
-          >
+        <div
+          style={{
+            marginTop: '1.5rem',
+            display: 'flex',
+            gap: '1rem',
+            justifyContent: 'center',
+          }}
+        >
+          <Button onClick={retry}>Try Again</Button>
+          <Button variant="secondary" onClick={() => window.location.reload()}>
             Reload Page
           </Button>
         </div>

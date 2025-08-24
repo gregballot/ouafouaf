@@ -13,7 +13,9 @@ const { Client } = pg;
 
 async function runMigrations() {
   const client = new Client({
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/ouafouaf'
+    connectionString:
+      process.env.DATABASE_URL ||
+      'postgresql://postgres:postgres@localhost:5432/ouafouaf',
   });
 
   try {
@@ -33,14 +35,12 @@ async function runMigrations() {
     const { rows: executedMigrations } = await client.query(
       'SELECT filename FROM migrations ORDER BY filename'
     );
-    const executedSet = new Set(executedMigrations.map(row => row.filename));
+    const executedSet = new Set(executedMigrations.map((row) => row.filename));
 
     // Read migration files
     const migrationsDir = join(__dirname, '../migrations');
     const files = await readdir(migrationsDir);
-    const migrationFiles = files
-      .filter(file => file.endsWith('.sql'))
-      .sort();
+    const migrationFiles = files.filter((file) => file.endsWith('.sql')).sort();
 
     console.log(`📄 Found ${migrationFiles.length} migration files`);
 
@@ -60,7 +60,9 @@ async function runMigrations() {
       await client.query('BEGIN');
       try {
         await client.query(sql);
-        await client.query('INSERT INTO migrations (filename) VALUES ($1)', [file]);
+        await client.query('INSERT INTO migrations (filename) VALUES ($1)', [
+          file,
+        ]);
         await client.query('COMMIT');
         console.log(`✅ Successfully executed ${file}`);
         executedCount++;
@@ -76,7 +78,6 @@ async function runMigrations() {
     } else {
       console.log(`🎉 Successfully executed ${executedCount} migrations`);
     }
-
   } catch (error) {
     console.error('💥 Migration failed:', error.message);
     process.exit(1);
