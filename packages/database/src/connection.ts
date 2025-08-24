@@ -28,3 +28,10 @@ export async function getConnection(): Promise<PoolClient> {
   }
   return pool.connect();
 }
+
+export function getPool(): Pool {
+  if (!pool) {
+    throw new Error('Database pool not initialized. Call createPool() first.');
+  }
+  return pool;
+}

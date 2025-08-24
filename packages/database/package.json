@@ -15,11 +15,19 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "db:setup": "node scripts/setup.js",
+    "db:migrate": "node scripts/migrate.js",
+    "db:reset": "node scripts/reset.js",
+    "db:test:setup": "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ouafouaf_test node scripts/setup.js",
+    "db:test:migrate": "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ouafouaf_test node scripts/migrate.js",
+    "db:test:reset": "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ouafouaf_test node scripts/reset.js"
   },
   "dependencies": {
-    "pg": "^8.12.0"
+    "pg": "^8.12.0",
+    "@repo/api-schemas": "workspace:*"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
