@@ -1,14 +1,14 @@
 import { ReactNode, FormHTMLAttributes } from 'react';
-import { UseFormReturn, FormProvider } from 'react-hook-form';
+import { UseFormReturn, FormProvider, FieldValues } from 'react-hook-form';
 
-export interface FormProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
+export interface FormProps<T extends FieldValues = FieldValues> extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
   children: ReactNode;
-  form: UseFormReturn<any>;
-  onSubmit: (data: any) => void | Promise<void>;
+  form: UseFormReturn<T>;
+  onSubmit: (data: T) => void | Promise<void>;
   className?: string;
 }
 
-export function Form({ children, form, onSubmit, className = '', ...props }: FormProps) {
+export function Form<T extends FieldValues = FieldValues>({ children, form, onSubmit, className = '', ...props }: FormProps<T>) {
   const handleSubmit = form.handleSubmit(async (data) => {
     try {
       await onSubmit(data);
@@ -19,8 +19,8 @@ export function Form({ children, form, onSubmit, className = '', ...props }: For
 
   return (
     <FormProvider {...form}>
-      <form 
-        onSubmit={handleSubmit} 
+      <form
+        onSubmit={handleSubmit}
         className={`form ${className}`}
         noValidate
         {...props}

@@ -4,7 +4,7 @@ import { EventRepository } from '../../DomainEvent/EventRepository';
 import { UserRegistered } from '../event';
 import { logger } from '../../../lib/logger';
 
-export interface RegisterUserPayload {
+export interface Payload {
   email: string;
   password: string;
 }
@@ -18,7 +18,7 @@ export interface RegisterUserResult {
   user: User;
 }
 export async function registerUser(
-  payload: RegisterUserPayload,
+  payload: Payload,
   dependencies: Dependencies
 ): Promise<RegisterUserResult> {
   const { userRepository, eventRepository } = dependencies;

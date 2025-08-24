@@ -1,8 +1,9 @@
 // Test setup file
 import { beforeAll, afterAll, beforeEach, vi } from 'vitest'
-import { createKyselyInstance, getDb } from '../shared/kysely'
-import { initializeDatabase } from '../config/database'
-import { logger } from '../lib/logger'
+import { createKyselyInstance, getDb } from '../kysely'
+import { initializeDatabase } from '../../config/database'
+import { logger } from '../../lib/logger'
+import { clearTestDatabase } from './database-utils'
 
 // Mock logger for tests to avoid console noise
 const mockLogger = {
@@ -27,10 +28,8 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
-  // Clean up database before each test
-  const db = getDb()
-  await db.deleteFrom('domain_events').execute()
-  await db.deleteFrom('users').execute()
+  // Clean up database before each test using our robust clearing function
+  await clearTestDatabase()
 })
 
 afterAll(async () => {

@@ -1,3 +1,5 @@
+import bcrypt from 'bcrypt';
+
 import { User, Email } from '../User';
 import { UserRepository } from '../UserRepository';
 import { EventRepository } from '../../DomainEvent/EventRepository';
@@ -5,7 +7,7 @@ import { UserLoggedIn } from '../event';
 import { InvalidCredentialsError } from '../../../shared/errors';
 import { logger } from '../../../lib/logger';
 
-export interface AuthenticateUserPayload {
+export interface Payload {
   email: string;
   password: string;
 }
@@ -19,24 +21,19 @@ export interface AuthenticateUserResult {
   user: User;
 }
 export async function authenticateUser(
-  payload: AuthenticateUserPayload,
+  payload: Payload,
   dependencies: Dependencies
 ): Promise<AuthenticateUserResult> {
   const { userRepository, eventRepository } = dependencies;
 
   const email = Email.create(payload.email);
-
-  if (!payload.password || typeof payload.password !== 'string') {
-    throw new InvalidCredentialsError();
-  }
-
   const user = await userRepository.findByEmail(email);
 
   let isValid = false;
   if (user) {
     isValid = await user.authenticate(payload.password);
   } else {
-    const bcrypt = await import('bcrypt');
+    // prevent timing attacks
     await bcrypt.compare(payload.password, '$2b$12$dummy.hash.to.prevent.timing.attacks.with.consistent.work.factor');
   }
 

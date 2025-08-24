@@ -422,55 +422,95 @@ describe('[Entity]', () => {
 ```
 
 ### Feature Integration Tests
+
+We use a **clean slate testing approach** with a dedicated test database:
+
+#### Test Database Philosophy
+- **Complete isolation**: Tests use `ouafouaf_test` database, completely separate from development data
+- **Clean slate per test**: Each test starts with an empty database and creates its own test data
+- **Real database operations**: No mocking of repositories or database operations
+- **Test utilities**: Centralized test infrastructure in `src/shared/test-utils/`
+
+#### Test Structure Pattern
 ```typescript
 // domain/[Subdomain]/features/[feature-name].test.ts
-describe('[Feature Name]', () => {
-  let testTransaction: Transaction;
-  let [entity]Repository: [Entity]Repository;
+import { describe, it, expect, beforeEach } from 'vitest';
+import { authenticateUser } from './authenticate-user';
+import { UserRepository } from '../UserRepository';
+import { EventRepository } from '../../DomainEvent/EventRepository';
+import { UserBuilder } from '../UserBuilder';
+import { User } from '../User';
+import { withTransaction } from '../../../shared/transaction';
+
+describe('Authenticate User Feature - Integration Tests', () => {
+  let testUser: User;
 
   beforeEach(async () => {
-    testTransaction = await createTestTransaction();
-    [entity]Repository = new [Entity]Repository(testTransaction);
+    // Create test data using withTransaction
+    await withTransaction(async (trx) => {
+      const userRepository = new UserRepository(trx);
+
+      testUser = await new UserBuilder()
+        .withEmail('test@example.com')
+        .withPassword('validpassword123')
+        .build();
+
+      await userRepository.save(testUser);
+    });
   });
 
-  afterEach(async () => {
-    await testTransaction.rollback();
+  it('should authenticate user with valid credentials', async () => {
+    // Test the feature using withTransaction
+    const result = await withTransaction(async (trx) => {
+      const userRepository = new UserRepository(trx);
+      const eventRepository = new EventRepository(trx);
+
+      return await authenticateUser(
+        { email: 'test@example.com', password: 'validpassword123' },
+        { userRepository, eventRepository }
+      );
+    });
+
+    // Verify returned data
+    expect(result.user.email.toString()).toBe('test@example.com');
+    expect(result.user.lastLogin).toBeInstanceOf(Date);
+
+    // Verify database state changes
+    await withTransaction(async (trx) => {
+      const userRepository = new UserRepository(trx);
+      const updatedUser = await userRepository.findById(testUser.id);
+      expect(updatedUser!.lastLogin).toBeInstanceOf(Date);
+    });
+
+    // Verify domain events were published
+    await withTransaction(async (trx) => {
+      const eventRepository = new EventRepository(trx);
+      const events = await eventRepository.findByAggregateId(testUser.id);
+      expect(events).toHaveLength(1);
+      expect(events[0].eventName).toBe('UserLoggedIn');
+    });
   });
 
-  it('should execute feature successfully', async () => {
-    // Arrange: Create test data using builders
-    const existing[Entity] = new [Entity]Builder()
-      .with[Property]('test-value')
-      .build();
+  it('should fail with invalid credentials', async () => {
+    await expect(withTransaction(async (trx) => {
+      const userRepository = new UserRepository(trx);
 
-    await [entity]Repository.save(existing[Entity]);
-
-    // Act: Execute feature
-    const result = await [featureName](
-      { inputProperty: 'test-input' },
-      { [entity]Repository }
-    );
-
-    // Assert: Verify results
-    expect(result.isSuccess()).toBe(true);
-    expect(result.value.[entity].someProperty).toBe('expected-value');
-
-    // Verify database state
-    const saved[Entity] = await [entity]Repository.findById(result.value.[entity].id);
-    expect(saved[Entity]).toBeDefined();
-  });
-
-  it('should handle error cases', async () => {
-    const result = await [featureName](
-      { invalidInput: 'bad-data' },
-      { [entity]Repository }
-    );
-
-    expect(result.isFailure()).toBe(true);
-    expect(result.error).toBe('Expected error message');
+      return await authenticateUser(
+        { email: 'test@example.com', password: 'wrongpassword' },
+        { userRepository }
+      );
+    })).rejects.toThrow('Invalid credentials');
   });
 });
 ```
+
+#### Key Testing Patterns
+- **beforeEach setup**: Create fresh test data for each test using `withTransaction()`
+- **Multiple transaction contexts**: Separate transactions for setup, execution, and verification
+- **Complete workflow testing**: Test the entire feature flow from input to database state
+- **Domain event verification**: Verify that domain events are properly published
+- **Error scenario testing**: Test both success and failure paths
+- **Builder pattern**: Use entity builders for consistent test data creation
 
 ### Builder Pattern
 ```typescript

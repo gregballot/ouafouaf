@@ -53,6 +53,9 @@ pnpm install
 # Start local database
 pnpm db:up
 
+# Set up database schema (first time only)
+pnpm db:setup
+
 # Development (runs all apps in parallel)
 pnpm dev
 
@@ -65,9 +68,26 @@ pnpm type-check
 # Linting
 pnpm lint
 
-# Stop local database
-pnpm db:down
+# Testing
+pnpm test
+
+# Database Management
+pnpm db:up        # Start PostgreSQL container
+pnpm db:down      # Stop PostgreSQL container
+pnpm db:setup     # Create database and run all migrations (first time)
+pnpm db:migrate   # Run new migrations only
+pnpm db:reset     # Drop all tables (destructive!)
 ```
+
+## Database Migration System
+
+When working with the database:
+- **First time setup**: Always run `pnpm db:up && pnpm db:setup`
+- **Before running tests**: Ensure database is set up with `pnpm db:setup`
+- **Adding new migrations**: Create numbered SQL files in `packages/database/migrations/`
+- **CI/CD**: Use `pnpm db:migrate` in deployment scripts
+
+The migration system tracks executed migrations automatically and only runs new ones.
 
 ## Code Style & Guidelines
 
@@ -150,52 +170,103 @@ pnpm db:down
 We follow a **pragmatic testing strategy** that emphasizes real integration over mocking:
 
 #### Integration Tests for Features
-- **No mocks for repositories or database operations** - use real database with transaction isolation
+- **No mocks for repositories or database operations** - use real test database with clean slate approach
 - **Test complete workflows** - verify the entire feature flow from input to database changes
 - **Use Builder pattern** for test data creation via `[Entity]Builder.ts` files
 - **Verify domain events** - check that events are published to database
-- **Transaction isolation** - each test runs in its own transaction and cleans up
+- **Clean slate testing** - each test starts with a completely empty database and creates its own test data
+
+### Test Database Setup
+
+The test suite uses a dedicated **ouafouaf_test** database that provides complete isolation from development data:
+
+#### Database Management
+- **Separate test database**: `ouafouaf_test` (completely isolated from development database)
+- **Clean slate approach**: Database is cleared before each test using table truncation
+- **Test utilities**: Located in `src/shared/test-utils/` for consistent test infrastructure
+- **Automatic setup**: Vitest handles database setup/teardown via global setup files
+
+#### Test Database Commands
+```bash
+# Set up test database (first time only)
+pnpm db:test:setup
+
+# Run database migrations for tests
+pnpm db:test:migrate
+
+# Run the full test suite
+pnpm test
+```
+
+#### Test Structure Pattern
+All feature integration tests MUST follow this pattern for consistent, isolated testing:
+
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest';
+import { authenticateUser } from './authenticate-user';
+import { UserRepository } from '../UserRepository';
+import { EventRepository } from '../../DomainEvent/EventRepository';
+import { UserBuilder } from '../UserBuilder';
+import { User } from '../User';
+import { withTransaction } from '../../../shared/transaction';
+
+describe('Feature Integration Tests', () => {
+  let testUser: User;
+
+  beforeEach(async () => {
+    // Create test data using withTransaction
+    await withTransaction(async (trx) => {
+      const userRepository = new UserRepository(trx);
+
+      testUser = await new UserBuilder()
+        .withEmail('test@example.com')
+        .withPassword('validpassword123')
+        .build();
+
+      await userRepository.save(testUser);
+    });
+  });
+
+  it('should authenticate user with valid credentials', async () => {
+    // Test the feature using withTransaction
+    const result = await withTransaction(async (trx) => {
+      const userRepository = new UserRepository(trx);
+      const eventRepository = new EventRepository(trx);
+
+      return await authenticateUser(
+        { email: 'test@example.com', password: 'validpassword123' },
+        { userRepository, eventRepository }
+      );
+    });
+
+    // Verify returned data
+    expect(result.user.email.toString()).toBe('test@example.com');
+
+    // Verify database state changes
+    await withTransaction(async (trx) => {
+      const userRepository = new UserRepository(trx);
+      const updatedUser = await userRepository.findById(testUser.id);
+      expect(updatedUser!.lastLogin).toBeInstanceOf(Date);
+    });
+
+    // Verify domain events were published
+    await withTransaction(async (trx) => {
+      const eventRepository = new EventRepository(trx);
+      const events = await eventRepository.findByAggregateId(testUser.id);
+      expect(events).toHaveLength(1);
+      expect(events[0].eventName).toBe('UserLoggedIn');
+    });
+  });
+});
+```
 
 #### Unit Tests for Entities
 - **Pure business logic testing** - test domain rules, validation, and entity behavior
 - **Value object validation** - test all edge cases for email, password, etc.
 - **No external dependencies** - entities should be testable in isolation
 
-### Test Structure Examples
-
 ```typescript
-// Feature Integration Test (PREFERRED)
-it('should register user successfully', async () => {
-  const result = await withTransaction(async (trx) => {
-    const userRepository = new UserRepository(trx);
-    const eventRepository = new EventRepository(trx);
-
-    return await registerUser(
-      { email: 'test@example.com', password: 'validpassword123' },
-      { userRepository, eventRepository }
-    );
-  });
-
-  // Verify returned data
-  expect(result.user.id).toBeDefined();
-
-  // Verify database state
-  await withTransaction(async (trx) => {
-    const userRepository = new UserRepository(trx);
-    const savedUser = await userRepository.findById(result.user.id);
-    expect(savedUser).toBeTruthy();
-  });
-
-  // Verify domain events
-  await withTransaction(async (trx) => {
-    const eventRepository = new EventRepository(trx);
-    const events = await eventRepository.findByAggregateId(result.user.id);
-    expect(events).toHaveLength(1);
-    expect(events[0].eventName).toBe('UserRegistered');
-  });
-});
-
-// Entity Unit Test
+// Entity Unit Test Example
 it('should create user with valid data', async () => {
   const email = Email.create('test@example.com');
   const password = await Password.create('validpassword123');
@@ -205,6 +276,11 @@ it('should create user with valid data', async () => {
   expect(user.email.toString()).toBe('test@example.com');
 });
 ```
+
+### Test Infrastructure Files
+- `src/shared/test-utils/database-utils.ts` - Database setup, cleanup, and teardown functions
+- `src/shared/test-utils/setup.ts` - Per-test database clearing and environment setup
+- `src/shared/test-utils/global-setup.ts` - Global test environment setup and teardown
 
 ### Quality Verification Commands
 

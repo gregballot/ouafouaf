@@ -54,6 +54,15 @@ export class InvalidCredentialsError extends DomainError {
   }
 }
 
+export class UnauthorizedError extends DomainError {
+  readonly code = 'UNAUTHORIZED';
+  readonly httpStatus = 401;
+
+  constructor(message: string = 'Unauthorized access') {
+    super(message);
+  }
+}
+
 // Conflict Errors (409)
 export class UserAlreadyExistsError extends DomainError {
   readonly code = 'USER_EXISTS';

@@ -29,7 +29,6 @@ export const LoginRequest = Type.Object({
 // Auth response schemas
 export const AuthResponse = Type.Object({
   user: User,
-  token: Type.String(),
   expires_at: Type.String({ format: 'date-time' })
 });
 

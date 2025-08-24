@@ -9,9 +9,9 @@ export interface FormInputProps extends Omit<InputHTMLAttributes<HTMLInputElemen
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ className = '', type = 'text', ...props }, ref) => {
     const { name, id } = useFormField();
-    const { 
-      register, 
-      formState: { errors } 
+    const {
+      register,
+      formState: { errors }
     } = useFormContext();
 
     const error = errors[name];

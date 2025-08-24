@@ -13,8 +13,9 @@ export interface DomainEventsTable {
   id: string;
   aggregate_id: string;
   event_name: string;
-  event_data: string; // JSON string
+  event_data: any; // JSONB - can be object or string
   occurred_at: Date;
+  created_at: Date;
 }
 
 export interface Database {

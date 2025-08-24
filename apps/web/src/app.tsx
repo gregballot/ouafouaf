@@ -1,38 +1,48 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthPage } from './components/auth-page'
+import { Home } from './components/home'
+import { ProtectedRoute } from './components/protected-route'
+import { ErrorBoundary } from './components/error-boundary'
 import { useAuth } from './hooks/use-auth'
-import { AuthTabs } from './components/auth'
-import { Button } from '@repo/ui'
+import { InitializingApp } from './components/auth-loading'
 
-export function App() {
-  const { isAuthenticated, user, logout } = useAuth()
+function AppContent() {
+  const { isInitializing } = useAuth()
 
-  if (!isAuthenticated) {
-    return (
-      <div className="app">
-        <div className="app__header">
-          <h1 className="app__title">Ouafouaf</h1>
-          <p className="app__subtitle">Welcome to your new monorepo!</p>
-        </div>
-        <div className="app__content">
-          <AuthTabs />
-        </div>
-      </div>
-    )
+  // Show app-wide initialization loading
+  if (isInitializing) {
+    return <InitializingApp />
   }
 
   return (
-    <div className="app">
-      <div className="app__header">
-        <h1 className="app__title">Welcome back, {user?.email}!</h1>
-        <Button variant="secondary" onClick={logout}>
-          Sign Out
-        </Button>
-      </div>
-      <div className="app__content">
-        <div className="dashboard">
-          <h2>Dashboard</h2>
-          <p>You are successfully logged in!</p>
-        </div>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/auth" element={<AuthPage />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
+
+export function App() {
+  return (
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        // Log error to monitoring service in production
+        console.error('Application error:', error, errorInfo)
+      }}
+    >
+      <Router>
+        <ErrorBoundary>
+          <AppContent />
+        </ErrorBoundary>
+      </Router>
+    </ErrorBoundary>
   )
 }

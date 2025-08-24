@@ -1,5 +1,5 @@
-export { Button } from './button';
-export type { ButtonProps } from './button';
+// Components
+export * from './components';
 
 // Form components
 export {
@@ -17,3 +17,10 @@ export {
   type FormErrorProps,
   type FormHelpProps
 } from './form';
+
+// Design tokens
+export * from './tokens';
+
+// Legacy exports (for backward compatibility) - now points to components
+export { Button } from './components/Button';
+export type { ButtonProps } from './components/Button';

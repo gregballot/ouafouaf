@@ -1,19 +1,23 @@
 import { useForm } from 'react-hook-form';
-import { Form, FormField, FormLabel, FormInput, FormError, Button } from '@repo/ui';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Alert } from '../ui/alert';
 import { useAuth } from '../../hooks/use-auth';
-import type { LoginRequestType } from '@repo/api-schemas';
+import { loginSchema, type LoginFormData } from '../../schemas/auth-schemas';
 
 export function LoginForm() {
   const { login, isLoggingIn, loginError, resetLoginError } = useAuth();
 
-  const form = useForm<LoginRequestType>({
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
       password: '',
     },
   });
 
-  const onSubmit = (data: LoginRequestType) => {
+  const onSubmit = (data: LoginFormData) => {
     resetLoginError();
     login(data);
   };
@@ -25,43 +29,56 @@ export function LoginForm() {
         <p className="auth-form__subtitle">Sign in to your account</p>
       </div>
 
-      <Form form={form} onSubmit={onSubmit} className="auth-form__form">
-        <FormField name="email">
-          <FormLabel required>Email</FormLabel>
-          <FormInput 
-            type="email" 
+      <form onSubmit={handleSubmit(onSubmit)} className="auth-form__form">
+        <div className="form-field">
+          <label htmlFor="email" className="form-label">
+            Email <span style={{ color: '#dc2626' }}>*</span>
+          </label>
+          <Input
+            id="email"
+            type="email"
             placeholder="Enter your email"
-            required
             autoComplete="email"
+            error={!!errors.email}
+            {...register('email')}
           />
-          <FormError />
-        </FormField>
+          {errors.email && (
+            <div className="form-error">{errors.email.message}</div>
+          )}
+        </div>
 
-        <FormField name="password">
-          <FormLabel required>Password</FormLabel>
-          <FormInput 
-            type="password" 
+        <div className="form-field">
+          <label htmlFor="password" className="form-label">
+            Password <span style={{ color: '#dc2626' }}>*</span>
+          </label>
+          <Input
+            id="password"
+            type="password"
             placeholder="Enter your password"
-            required
             autoComplete="current-password"
+            error={!!errors.password}
+            {...register('password')}
           />
-          <FormError />
-        </FormField>
+          {errors.password && (
+            <div className="form-error">{errors.password.message}</div>
+          )}
+        </div>
 
         {loginError && (
-          <div className="auth-form__error" role="alert">
+          <Alert variant="error">
             {loginError.message}
-          </div>
+          </Alert>
         )}
 
-        <Button 
-          type="submit" 
-          loading={isLoggingIn}
+        <Button
+          type="submit"
+          isLoading={isLoggingIn}
           className="auth-form__submit"
+          style={{ width: '100%' }}
         >
-          {isLoggingIn ? 'Signing In...' : 'Sign In'}
+          Sign In
         </Button>
-      </Form>
+      </form>
     </div>
   );
 }

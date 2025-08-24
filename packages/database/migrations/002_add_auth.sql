@@ -1,5 +1,5 @@
 -- Add authentication fields to users table
-ALTER TABLE users 
+ALTER TABLE users
 ADD COLUMN password_hash VARCHAR(255) NOT NULL,
 ADD COLUMN last_login TIMESTAMP WITH TIME ZONE;
 
