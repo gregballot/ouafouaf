@@ -45,16 +45,13 @@ src/
 │       ├── DomainEvent.ts      # Base event interface
 │       ├── EventRepository.ts  # Event infrastructure with Kysely
 │       └── index.ts            # Type-safe event aggregation
-├── shared/
-│   ├── database-types.ts       # Kysely database schema types
-│   ├── kysely.ts               # Kysely instance configuration
-│   ├── transaction.ts          # Transaction management helpers
-│   ├── errors.ts               # Domain errors with HTTP mapping
-│   ├── error-handler.ts        # Global Fastify error handler
-│   └── types.ts                # Shared type definitions
-└── docs/
-    ├── architecture.md         # This file
-    └── implementation-plan.md  # Current implementation roadmap
+└── shared/
+    ├── database-types.ts       # Kysely database schema types
+    ├── kysely.ts               # Kysely instance configuration
+    ├── transaction.ts          # Transaction management helpers
+    ├── errors.ts               # Domain errors with HTTP mapping
+    ├── error-handler.ts        # Global Fastify error handler
+    └── types.ts                # Shared type definitions
 ```
 
 ## Entity Design Patterns
@@ -93,53 +90,72 @@ export class Email {
 export interface [Entity]ConstructorParams {
   id: string;
   email: Email;
-  // ... other properties
+  passwordHash: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface Create[Entity]Params {
   email: Email;
-  // ... other creation parameters
+  passwordHash: string;
 }
 
 // Main Entity
 export class [Entity] {
-  private constructor(private readonly params: [Entity]ConstructorParams) {}
+  public readonly id: string;
+  public readonly email: Email;
+  public readonly passwordHash: string; // sensitive field
+  public readonly createdAt: Date;
+  public updatedAt: Date;
+
+  private constructor(params: [Entity]ConstructorParams) {
+    this.id = params.id;
+    this.email = params.email;
+    this.passwordHash = params.passwordHash;
+    this.createdAt = params.createdAt;
+    this.updatedAt = params.updatedAt;
+  }
 
   static async create(params: Create[Entity]Params): Promise<[Entity]> {
     const now = new Date();
     return new [Entity]({
       id: crypto.randomUUID(),
       email: params.email,
-      // ... other properties
+      passwordHash: params.passwordHash,
       createdAt: now,
       updatedAt: now
     });
   }
 
-  // Getters for immutable access
-  get id(): string { return this.params.id; }
-  get email(): Email { return this.params.email; }
-  get createdAt(): Date { return this.params.createdAt; }
-  get updatedAt(): Date { return this.params.updatedAt; }
+  // Public state getter - excludes sensitive fields
+  get details() {
+    return {
+      id: this.id,
+      email: this.email.toString(),
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
+    };
+  }
 
   // Business methods - return new instances for immutability
   public businessMethod(): [Entity] {
     return new [Entity]({
-      ...this.params,
+      id: this.id,
+      email: this.email,
+      passwordHash: this.passwordHash,
+      createdAt: this.createdAt,
       updatedAt: new Date()
     });
   }
 
-  // For persistence - exposes internal state
+  // For persistence - exposes internal state including sensitive fields
   public getInternalState() {
     return {
-      id: this.params.id,
-      email: this.params.email.toString(),
-      // ... other serializable properties
-      createdAt: this.params.createdAt,
-      updatedAt: this.params.updatedAt
+      id: this.id,
+      email: this.email.toString(),
+      passwordHash: this.passwordHash,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
     };
   }
 }
@@ -181,8 +197,8 @@ export class [Entity]Repository {
           .updateTable('[table]')
           .set({
             email: state.email,
-            updated_at: state.updatedAt,
-            // ... other fields
+            password_hash: state.passwordHash,
+            updated_at: state.updatedAt
           })
           .where('id', '=', state.id)
           .execute();
@@ -193,9 +209,9 @@ export class [Entity]Repository {
           .values({
             id: state.id,
             email: state.email,
+            password_hash: state.passwordHash,
             created_at: state.createdAt,
-            updated_at: state.updatedAt,
-            // ... other fields
+            updated_at: state.updatedAt
           })
           .execute();
       }
@@ -241,9 +257,9 @@ export class [Entity]Repository {
     return new [Entity]({
       id: row.id,
       email: Email.create(row.email),
+      passwordHash: row.password_hash,
       createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      // ... other mapped fields
+      updatedAt: row.updated_at
     });
   }
 }
@@ -526,7 +542,6 @@ describe('Authenticate User Feature - Integration Tests', () => {
 #### Key Testing Patterns
 
 - **beforeEach setup**: Create fresh test data for each test using `withTransaction()`
-- **Multiple transaction contexts**: Separate transactions for setup, execution, and verification
 - **Complete workflow testing**: Test the entire feature flow from input to database state
 - **Domain event verification**: Verify that domain events are properly published
 - **Error scenario testing**: Test both success and failure paths
@@ -590,16 +605,6 @@ export async function [resource]Routes(fastify: FastifyInstance) {
         eventRepository
       }
     );
-
-    // Handle response
-    if (result.isFailure()) {
-      return reply.status(400).send({
-        error: {
-          message: result.error,
-          code: '[ERROR_CODE]'
-        }
-      });
-    }
 
     return reply.status(201).send({
       [entity]: {
