@@ -1,6 +1,8 @@
 # Ouafouaf
 
-A full-stack TypeScript monorepo built with Turborepo.
+This projet is a platform designed for independent pet boarding business owners. We provide a clean, intuitive tool to eliminate administrative stress, giving you back the time and peace of mind to focus on what truly matters: the well-being of the animals in your care.
+
+The system is built around two core applications. First, a professional client-facing portal that showcases your services and allows your customers to easily request bookings online. Second, a powerful CRM to manage all client and pet information in one place.
 
 ## Tech Stack
 
@@ -63,8 +65,6 @@ pnpm test        # Run tests
 ### Database
 
 ```bash
-pnpm db:up       # Start PostgreSQL container
-pnpm db:down     # Stop PostgreSQL container
 pnpm db:setup    # Create database and run all migrations (first time)
 pnpm db:migrate  # Run new migrations only
 pnpm db:reset    # Drop all tables (destructive!)
