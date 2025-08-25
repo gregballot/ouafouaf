@@ -5,6 +5,8 @@ import { Input } from '../ui/input';
 import { Alert } from '../ui/alert';
 import { useAuth } from '../../hooks/use-auth';
 import { loginSchema, type LoginFormData } from '../../schemas/auth-schemas';
+import formStyles from './auth-form.module.scss';
+import fieldStyles from '../ui/form.module.scss';
 
 export function LoginForm() {
   const { login, isLoggingIn, loginError, resetLoginError } = useAuth();
@@ -27,16 +29,19 @@ export function LoginForm() {
   };
 
   return (
-    <div className="auth-form">
-      <div className="auth-form__header">
-        <h2 className="auth-form__title">Welcome Back</h2>
-        <p className="auth-form__subtitle">Sign in to your account</p>
+    <div>
+      <div className={formStyles.authFormHeader}>
+        <h2 className={formStyles.authFormTitle}>Welcome Back</h2>
+        <p className={formStyles.authFormSubtitle}>Sign in to your account</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="auth-form__form">
-        <div className="form-field">
-          <label htmlFor="email" className="form-label">
-            Email <span style={{ color: '#dc2626' }}>*</span>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className={formStyles.authFormForm}
+      >
+        <div className={fieldStyles.formField}>
+          <label htmlFor="email" className={fieldStyles.formLabel}>
+            Email <span className={fieldStyles.formLabelRequiredMark}>*</span>
           </label>
           <Input
             id="email"
@@ -47,13 +52,14 @@ export function LoginForm() {
             {...register('email')}
           />
           {errors.email && (
-            <div className="form-error">{errors.email.message}</div>
+            <div className={fieldStyles.formError}>{errors.email.message}</div>
           )}
         </div>
 
-        <div className="form-field">
-          <label htmlFor="password" className="form-label">
-            Password <span style={{ color: '#dc2626' }}>*</span>
+        <div className={fieldStyles.formField}>
+          <label htmlFor="password" className={fieldStyles.formLabel}>
+            Password{' '}
+            <span className={fieldStyles.formLabelRequiredMark}>*</span>
           </label>
           <Input
             id="password"
@@ -64,7 +70,9 @@ export function LoginForm() {
             {...register('password')}
           />
           {errors.password && (
-            <div className="form-error">{errors.password.message}</div>
+            <div className={fieldStyles.formError}>
+              {errors.password.message}
+            </div>
           )}
         </div>
 
@@ -73,7 +81,7 @@ export function LoginForm() {
         <Button
           type="submit"
           isLoading={isLoggingIn}
-          className="auth-form__submit"
+          className={formStyles.authFormSubmit}
           style={{ width: '100%' }}
         >
           Sign In

@@ -1,0 +1,140 @@
+@import '../../styles/variables.scss';
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+  border-radius: $radius-md;
+  font-family: inherit;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  border: 1px solid transparent;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+// Size variants
+.buttonSm {
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  min-height: 2rem;
+}
+
+.buttonMd {
+  padding: $spacing-3 $spacing-4;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  min-height: 2.5rem;
+}
+
+.buttonLg {
+  padding: $spacing-4 $spacing-6;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+  min-height: 3rem;
+}
+
+// Variant styles
+.buttonPrimary {
+  background-color: $color-primary-500;
+  color: $color-neutral-0;
+  border-color: $color-primary-500;
+
+  &:hover:not(:disabled) {
+    background-color: $color-primary-600;
+    border-color: $color-primary-600;
+  }
+
+  &:focus {
+    outline: 2px solid $color-primary-500;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    background-color: $color-neutral-300;
+    border-color: $color-neutral-300;
+    color: $color-neutral-500;
+  }
+}
+
+.buttonSecondary {
+  background-color: $color-neutral-0;
+  color: $color-neutral-900;
+  border-color: $color-neutral-300;
+
+  &:hover:not(:disabled) {
+    background-color: $color-neutral-50;
+    border-color: $color-neutral-400;
+  }
+
+  &:focus {
+    outline: 2px solid $color-primary-500;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    background-color: $color-neutral-100;
+    border-color: $color-neutral-200;
+    color: $color-neutral-400;
+  }
+}
+
+.buttonGhost {
+  background-color: transparent;
+  color: $color-neutral-700;
+  border-color: transparent;
+
+  &:hover:not(:disabled) {
+    background-color: $color-neutral-100;
+  }
+
+  &:focus {
+    outline: 2px solid $color-primary-500;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    color: $color-neutral-400;
+  }
+}
+
+.buttonDestructive {
+  background-color: $color-error-500;
+  color: $color-neutral-0;
+  border-color: $color-error-500;
+
+  &:hover:not(:disabled) {
+    background-color: $color-error-600;
+    border-color: $color-error-600;
+  }
+
+  &:focus {
+    outline: 2px solid $color-error-500;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    background-color: $color-neutral-300;
+    border-color: $color-neutral-300;
+    color: $color-neutral-500;
+  }
+}
+
+.buttonContent {
+  transition: opacity 0.2s ease-in-out;
+
+  &.buttonContentLoading {
+    opacity: 0.7;
+  }
+}
+
+.loadingSpinner {
+  animation: spin 1s linear infinite;
+}

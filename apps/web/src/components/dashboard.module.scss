@@ -1,0 +1,22 @@
+.dashboard {
+  background: $color-neutral-0;
+  padding: $spacing-8;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+.dashboardTitle {
+  margin-bottom: $spacing-4;
+  color: $color-neutral-800;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.dashboardText {
+  color: $color-neutral-600;
+  line-height: 1.6;
+  margin-bottom: $spacing-6;
+}

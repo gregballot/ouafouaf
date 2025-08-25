@@ -1,7 +1,8 @@
 import { ButtonHTMLAttributes } from 'react';
+import styles from './button.module.scss';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 }
@@ -15,14 +16,19 @@ export function Button({
   className = '',
   ...props
 }: ButtonProps) {
-  const classes = ['btn', `btn--${variant}`, `btn--${size}`, className]
+  const classes = [
+    styles.btn,
+    styles[`btn${size.charAt(0).toUpperCase() + size.slice(1)}`],
+    styles[`btn${variant.charAt(0).toUpperCase() + variant.slice(1)}`],
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
 
   return (
     <button className={classes} disabled={disabled || isLoading} {...props}>
-      {isLoading && <div className="btn__spinner">⟳</div>}
-      <span className={isLoading ? 'btn__text--loading' : ''}>{children}</span>
+      {isLoading && <span className={styles.btnSpinner}>⟳</span>}
+      <span className={isLoading ? styles.btnTextLoading : ''}>{children}</span>
     </button>
   );
 }

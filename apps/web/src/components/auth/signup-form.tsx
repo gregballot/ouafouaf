@@ -11,6 +11,8 @@ import {
   getPasswordStrength,
 } from '../../schemas/auth-schemas';
 import { useState, useEffect } from 'react';
+import formStyles from './auth-form.module.scss';
+import fieldStyles from '../ui/form.module.scss';
 
 export function SignupForm() {
   const { signup, isSigningUp, signupError, resetSignupError } = useAuth();
@@ -53,16 +55,20 @@ export function SignupForm() {
   };
 
   return (
-    <div className="auth-form">
-      <div className="auth-form__header">
-        <h2 className="auth-form__title">Create Account</h2>
-        <p className="auth-form__subtitle">Sign up to get started</p>
+    <div>
+      <div className={formStyles.authFormHeader}>
+        <h2 className={formStyles.authFormTitle}>Create Account</h2>
+        <p className={formStyles.authFormSubtitle}>Sign up to get started</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="auth-form__form">
-        <div className="form-field">
-          <label htmlFor="name" className="form-label">
-            Full Name <span style={{ color: '#dc2626' }}>*</span>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className={formStyles.authFormForm}
+      >
+        <div className={fieldStyles.formField}>
+          <label htmlFor="name" className={fieldStyles.formLabel}>
+            Full Name{' '}
+            <span className={fieldStyles.formLabelRequiredMark}>*</span>
           </label>
           <Input
             id="name"
@@ -73,13 +79,13 @@ export function SignupForm() {
             {...register('name')}
           />
           {errors.name && (
-            <div className="form-error">{errors.name.message}</div>
+            <div className={fieldStyles.formError}>{errors.name.message}</div>
           )}
         </div>
 
-        <div className="form-field">
-          <label htmlFor="email" className="form-label">
-            Email <span style={{ color: '#dc2626' }}>*</span>
+        <div className={fieldStyles.formField}>
+          <label htmlFor="email" className={fieldStyles.formLabel}>
+            Email <span className={fieldStyles.formLabelRequiredMark}>*</span>
           </label>
           <Input
             id="email"
@@ -90,13 +96,14 @@ export function SignupForm() {
             {...register('email')}
           />
           {errors.email && (
-            <div className="form-error">{errors.email.message}</div>
+            <div className={fieldStyles.formError}>{errors.email.message}</div>
           )}
         </div>
 
-        <div className="form-field">
-          <label htmlFor="password" className="form-label">
-            Password <span style={{ color: '#dc2626' }}>*</span>
+        <div className={fieldStyles.formField}>
+          <label htmlFor="password" className={fieldStyles.formLabel}>
+            Password{' '}
+            <span className={fieldStyles.formLabelRequiredMark}>*</span>
           </label>
           <Input
             id="password"
@@ -110,13 +117,16 @@ export function SignupForm() {
           <PasswordStrength password={password} strength={passwordStrength} />
 
           {errors.password && (
-            <div className="form-error">{errors.password.message}</div>
+            <div className={fieldStyles.formError}>
+              {errors.password.message}
+            </div>
           )}
         </div>
 
-        <div className="form-field">
-          <label htmlFor="confirmPassword" className="form-label">
-            Confirm Password <span style={{ color: '#dc2626' }}>*</span>
+        <div className={fieldStyles.formField}>
+          <label htmlFor="confirmPassword" className={fieldStyles.formLabel}>
+            Confirm Password{' '}
+            <span className={fieldStyles.formLabelRequiredMark}>*</span>
           </label>
           <Input
             id="confirmPassword"
@@ -127,7 +137,9 @@ export function SignupForm() {
             {...register('confirmPassword')}
           />
           {errors.confirmPassword && (
-            <div className="form-error">{errors.confirmPassword.message}</div>
+            <div className={fieldStyles.formError}>
+              {errors.confirmPassword.message}
+            </div>
           )}
         </div>
 
@@ -136,7 +148,7 @@ export function SignupForm() {
         <Button
           type="submit"
           isLoading={isSigningUp}
-          className="auth-form__submit"
+          className={formStyles.authFormSubmit}
           style={{ width: '100%' }}
           disabled={isSigningUp || passwordStrength.score < 2}
         >

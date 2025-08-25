@@ -1,0 +1,97 @@
+.btn {
+  @include button-base;
+}
+
+.btnSm {
+  @include button-size('sm');
+}
+
+.btnMd {
+  @include button-size('md');
+}
+
+.btnLg {
+  @include button-size('lg');
+}
+
+.btnPrimary {
+  background-color: $color-primary-600;
+  color: $color-neutral-0;
+  
+  &:hover:not(:disabled) {
+    background-color: $color-primary-700;
+  }
+  
+  &:active:not(:disabled) {
+    background-color: $color-primary-800;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($color-primary-600, 0.3);
+  }
+}
+
+.btnSecondary {
+  background-color: $color-neutral-600;
+  color: $color-neutral-0;
+  
+  &:hover:not(:disabled) {
+    background-color: $color-neutral-700;
+  }
+  
+  &:active:not(:disabled) {
+    background-color: $color-neutral-800;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($color-neutral-600, 0.3);
+  }
+}
+
+.btnOutline {
+  background-color: transparent;
+  color: $color-primary-600;
+  border: 1px solid $color-primary-600;
+  
+  &:hover:not(:disabled) {
+    background-color: $color-primary-50;
+  }
+  
+  &:active:not(:disabled) {
+    background-color: $color-primary-100;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($color-primary-600, 0.3);
+  }
+}
+
+.btnGhost {
+  background-color: transparent;
+  color: $color-neutral-700;
+  
+  &:hover:not(:disabled) {
+    background-color: $color-neutral-100;
+  }
+  
+  &:active:not(:disabled) {
+    background-color: $color-neutral-200;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($color-neutral-400, 0.3);
+  }
+}
+
+.btnSpinner {
+  font-size: 0.875rem;
+  animation: spin 1s linear infinite;
+}
+
+.btnTextLoading {
+  opacity: 0.7;
+}

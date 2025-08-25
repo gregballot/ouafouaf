@@ -1,13 +1,14 @@
 import { AuthTabs } from './auth';
+import styles from './app-layout.module.scss';
 
 export function AuthPage() {
   return (
-    <div className="app">
-      <div className="app__header">
-        <h1 className="app__title">Ouafouaf</h1>
-        <p className="app__subtitle">Welcome to your new monorepo!</p>
+    <div className={styles.app}>
+      <div className={styles.appHeader}>
+        <h1 className={styles.appTitle}>Ouafouaf</h1>
+        <p className={styles.appSubtitle}>Welcome to your new monorepo!</p>
       </div>
-      <div className="app__content">
+      <div className={styles.appContent}>
         <AuthTabs />
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { InputHTMLAttributes, forwardRef } from 'react';
+import styles from './form.module.scss';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
@@ -6,7 +7,11 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className = '', error = false, ...props }, ref) => {
-    const classes = ['form-input', error ? 'form-input--error' : '', className]
+    const classes = [
+      styles.formInput,
+      error ? styles.formInputError : '',
+      className,
+    ]
       .filter(Boolean)
       .join(' ');
 

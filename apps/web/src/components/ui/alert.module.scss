@@ -1,0 +1,29 @@
+.alert {
+  padding: $spacing-3;
+  border-radius: $radius-md;
+  font-size: 0.875rem;
+}
+
+.alertError {
+  background-color: $color-error-50;
+  border: 1px solid $color-error-200;
+  color: $color-error-600;
+}
+
+.alertSuccess {
+  background-color: $color-success-50;
+  border: 1px solid $color-success-200;
+  color: $color-success-700;
+}
+
+.alertWarning {
+  background-color: $color-warning-50;
+  border: 1px solid $color-warning-200;
+  color: $color-warning-700;
+}
+
+.alertInfo {
+  background-color: $color-info-50;
+  border: 1px solid $color-info-200;
+  color: $color-info-700;
+}

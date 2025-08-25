@@ -10,6 +10,18 @@ export default defineConfig({
       '@repo/database': resolve(__dirname, '../../packages/database/src'),
     },
   },
+  css: {
+    modules: {
+      localsConvention: 'camelCaseOnly',
+      generateScopedName: '[name]__[local]___[hash:base64:5]',
+    },
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "@/styles/variables.scss";`,
+        silenceDeprecations: ['legacy-js-api'],
+      },
+    },
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,

@@ -1,0 +1,38 @@
+.authTabs {
+  max-width: 400px;
+  margin: 0 auto;
+  background: $color-neutral-0;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  overflow: hidden;
+}
+
+.authTabsHeader {
+  display: flex;
+  border-bottom: 1px solid $color-neutral-200;
+}
+
+.authTabsTab {
+  flex: 1;
+  padding: $spacing-4;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  color: $color-neutral-500;
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: $color-neutral-50;
+  }
+}
+
+.authTabsTabActive {
+  color: $color-primary-600;
+  background-color: $color-primary-50;
+  border-bottom: 2px solid $color-primary-600;
+}
+
+.authTabsContent {
+  padding: $spacing-6;
+}

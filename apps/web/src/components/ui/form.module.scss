@@ -1,0 +1,35 @@
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+}
+
+.formLabel {
+  font-weight: 500;
+  color: $color-neutral-700;
+  font-size: 0.875rem;
+}
+
+.formLabelRequired .formLabelRequiredMark {
+  color: $color-error-600;
+  margin-left: $spacing-1;
+}
+
+.formInput {
+  @include form-field;
+  font-size: 1rem;
+}
+
+.formInputError {
+  border-color: $color-error-600;
+  
+  &:focus {
+    border-color: $color-error-600;
+    box-shadow: 0 0 0 3px rgba($color-error-600, 0.1);
+  }
+}
+
+.formError {
+  color: $color-error-600;
+  font-size: 0.875rem;
+}
