@@ -5,6 +5,7 @@ This document outlines the styling architecture and guidelines for the ouafouaf 
 ## Overview
 
 The project uses a unified styling approach with:
+
 - **SCSS** for preprocessing and design tokens
 - **CSS Modules** for scoped component styling
 - **No global CSS** to prevent style conflicts
@@ -44,9 +45,10 @@ All design tokens are centralized in `apps/web/src/styles/variables.scss`:
 ### CSS Modules Configuration
 
 CSS modules are configured in Vite with:
+
 - **Naming**: `camelCaseOnly` convention for JavaScript imports
 - **Scoped Names**: `[name]__[local]___[hash:base64:5]` format
-- **Auto-import**: SCSS variables available in all modules
+- **Auto-import**: SCSS variables available in all modules using modern `@use` syntax
 
 ## Naming Conventions
 
@@ -58,8 +60,8 @@ $color-primary-500: #0ea5e9;
 $color-neutral-100: #f5f5f5;
 
 // Spacing: $spacing-{scale}
-$spacing-4: 1rem;    // 16px
-$spacing-8: 2rem;    // 32px
+$spacing-4: 1rem; // 16px
+$spacing-8: 2rem; // 32px
 
 // Typography: $font-{property}-{variant}
 $font-size-lg: 1.125rem;
@@ -70,19 +72,26 @@ $font-weight-semibold: 600;
 
 ```scss
 // Component base class
-.btn { }
+.btn {
+}
 
 // Variants with PascalCase suffixes
-.btnPrimary { }
-.btnSecondary { }
+.btnPrimary {
+}
+.btnSecondary {
+}
 
 // Sizes with PascalCase suffixes
-.btnSm { }
-.btnLg { }
+.btnSm {
+}
+.btnLg {
+}
 
 // States
-.disabled { }
-.loading { }
+.disabled {
+}
+.loading {
+}
 ```
 
 ### JavaScript Imports
@@ -92,12 +101,9 @@ $font-weight-semibold: 600;
 import styles from './button.module.scss';
 
 // Class composition
-const classes = [
-  styles.btn,
-  styles.btnPrimary,
-  styles.btnLg,
-  className
-].filter(Boolean).join(' ');
+const classes = [styles.btn, styles.btnPrimary, styles.btnLg, className]
+  .filter(Boolean)
+  .join(' ');
 ```
 
 ## Component Patterns
@@ -113,11 +119,11 @@ interface ComponentProps {
   className?: string;
 }
 
-export function Component({ 
-  variant = 'primary', 
-  size = 'md', 
+export function Component({
+  variant = 'primary',
+  size = 'md',
   className,
-  ...props 
+  ...props
 }: ComponentProps) {
   const classes = [
     styles.component,
@@ -143,7 +149,7 @@ export function Component({
   padding: $spacing-3;
   border-radius: $radius-md;
   font-size: $font-size-base;
-  
+
   // Use mixins for common patterns
   @include transition-base;
 }
@@ -152,7 +158,7 @@ export function Component({
 .componentPrimary {
   background-color: $color-primary-600;
   color: $color-neutral-0;
-  
+
   &:hover:not(:disabled) {
     background-color: $color-primary-700;
   }
@@ -229,11 +235,54 @@ When creating new components or updating existing ones:
 3. Update TypeScript interfaces if adding new variants
 4. Test in Storybook if available
 
+## SCSS Import Guidelines
+
+### Modern @use Syntax (Preferred)
+
+Use the modern `@use` syntax instead of the deprecated `@import`:
+
+```scss
+// ✅ Good - Modern @use syntax
+@use '@/styles/variables.scss' as *;
+
+.component {
+  padding: $spacing-4; // Variables available directly
+  color: $color-primary-600;
+}
+```
+
+```scss
+// ❌ Deprecated - Old @import syntax (avoid)
+@import '@/styles/variables.scss';
+```
+
+**Benefits of @use:**
+
+- **Namespaced imports**: Prevents variable conflicts
+- **Better performance**: Variables are processed once per module
+- **Future-proof**: `@import` is deprecated in Dart Sass
+- **Explicit dependencies**: Clearer module relationships
+
+### Vite Configuration
+
+The project is configured to auto-import variables using `@use` syntax:
+
+```typescript
+// vite.config.ts
+css: {
+  preprocessorOptions: {
+    scss: {
+      additionalData: `@use "@/styles/variables.scss" as *;`,
+    },
+  },
+}
+```
+
 ## Tools and Configuration
 
-- **Vite**: SCSS preprocessing and CSS modules
+- **Vite**: SCSS preprocessing and CSS modules with `@use` syntax
 - **CSS Modules**: Scoped styling with camelCase imports
-- **SCSS**: Variables, mixins, and nesting
+- **SCSS**: Variables, mixins, and nesting using modern `@use` imports
 - **ESLint**: Consistent code formatting
 - **Storybook**: Component development and testing
 

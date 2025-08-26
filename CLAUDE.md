@@ -10,6 +10,7 @@
 ## Project Overview
 
 Full-stack TypeScript monorepo using Turborepo:
+
 - **Frontend**: Vite + React + SWC (apps/web)
 - **Backend**: Fastify API (apps/api) with DDD + Hexagonal Architecture
 - **Database**: PostgreSQL with Kysely for type-safe queries
@@ -17,6 +18,7 @@ Full-stack TypeScript monorepo using Turborepo:
 - **Package Manager**: pnpm
 
 **Monorepo Structure:**
+
 ```
 apps/web/          # Vite + React frontend
 apps/api/          # Fastify backend with DDD

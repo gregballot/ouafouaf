@@ -5,6 +5,7 @@ This document outlines security principles and practices to ensure the applicati
 ## Core Security Principles
 
 ### Environment Variable Management
+
 - **Never include fallback secrets** in code - always require environment variables for sensitive data
 - **Fail fast if missing** - application should not start without required security configuration
 - **No hardcoded credentials** - all sensitive data must come from environment variables
@@ -27,6 +28,7 @@ const jwtSecret = process.env.JWT_SECRET || 'default-secret-key';
 ```
 
 ### Multi-Layer Validation
+
 - **Validate inputs at all boundaries**: client, API, and database layers
 - **Never trust external data** - validate everything that crosses system boundaries
 - **Client-side validation** for user experience, **server-side validation** for security
@@ -42,18 +44,19 @@ const loginSchema = z.object({
 // API validation
 export async function authenticate(payload: unknown) {
   const validatedPayload = loginSchema.parse(payload); // Throws if invalid
-  
+
   // Additional business logic validation
   const email = Email.create(validatedPayload.email);
   if (!email) {
     throw new InvalidEmailError();
   }
-  
+
   // Continue with secure processing...
 }
 ```
 
 ### Database Security
+
 - **Use parameterized queries exclusively** - never use string concatenation for SQL
 - **Kysely provides automatic parameterization** - leverage type-safe query building
 - **Database-level constraints** for critical business rules
@@ -72,6 +75,7 @@ const query = `SELECT * FROM users WHERE email = '${email}'`;
 ```
 
 ### Defensive Programming
+
 - **Always check for null/undefined** before using critical data
 - **Assume external systems can fail** or return unexpected data
 - **Validate data shapes** especially from external APIs or user input
@@ -83,12 +87,12 @@ export async function getUserProfile(userId: string) {
   if (!userId?.trim()) {
     throw new InvalidInputError('User ID is required');
   }
-  
+
   const user = await userRepository.findById(userId);
   if (!user) {
     throw new UserNotFoundError(); // Don't expose existence check details
   }
-  
+
   return {
     id: user.id,
     email: user.email.toString(),
@@ -100,6 +104,7 @@ export async function getUserProfile(userId: string) {
 ## Authentication & Authorization
 
 ### JWT Token Security
+
 - **Strong secret generation** - use cryptographically secure random secrets
 - **Appropriate token expiration** - balance security with user experience
 - **Secure token storage** - httpOnly cookies preferred over localStorage
@@ -124,6 +129,7 @@ const cookieOptions = {
 ```
 
 ### Password Security
+
 - **Strong hashing** - use bcrypt or similar with appropriate salt rounds
 - **Password complexity requirements** - enforce minimum security standards
 - **Rate limiting** on authentication attempts
@@ -133,13 +139,13 @@ const cookieOptions = {
 // Password hashing
 export class Password {
   private static readonly SALT_ROUNDS = 12;
-  
+
   static async create(plaintext: string): Promise<Password> {
     this.validateStrength(plaintext); // Enforce complexity
     const hash = await bcrypt.hash(plaintext, this.SALT_ROUNDS);
     return new Password(hash);
   }
-  
+
   async verify(plaintext: string): Promise<boolean> {
     return bcrypt.compare(plaintext, this.hash);
   }
@@ -149,6 +155,7 @@ export class Password {
 ## Input Validation & Sanitization
 
 ### Validation Strategy
+
 - **Schema-based validation** using Zod for consistent validation rules
 - **Strict type checking** at runtime for external data
 - **Whitelist approach** - only allow known, expected values
@@ -157,16 +164,22 @@ export class Password {
 ```typescript
 // Comprehensive validation schemas
 const createUserSchema = z.object({
-  email: z.string()
+  email: z
+    .string()
     .email('Invalid email format')
     .max(255, 'Email too long')
     .toLowerCase()
     .trim(),
-  password: z.string()
+  password: z
+    .string()
     .min(8, 'Password too short')
     .max(128, 'Password too long')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password complexity requirements not met'),
-  name: z.string()
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      'Password complexity requirements not met'
+    ),
+  name: z
+    .string()
     .min(1, 'Name required')
     .max(100, 'Name too long')
     .regex(/^[a-zA-Z\s-']+$/, 'Invalid characters in name'),
@@ -174,6 +187,7 @@ const createUserSchema = z.object({
 ```
 
 ### Output Encoding
+
 - **Escape HTML content** when rendering user-generated content
 - **JSON encoding** for API responses to prevent injection
 - **Context-aware encoding** based on output destination
@@ -182,12 +196,14 @@ const createUserSchema = z.object({
 ## Network Security
 
 ### HTTPS Enforcement
+
 - **Force HTTPS** in production environments
 - **Secure cookie flags** for HTTPS-only transmission
 - **HSTS headers** to prevent downgrade attacks
 - **Certificate validation** for external API calls
 
 ### CORS Configuration
+
 ```typescript
 // Restrictive CORS policy
 const corsOptions = {
@@ -199,6 +215,7 @@ const corsOptions = {
 ```
 
 ### Rate Limiting
+
 - **API rate limiting** to prevent abuse
 - **Authentication attempt limits** to prevent brute force
 - **IP-based limiting** for suspicious activity
@@ -207,6 +224,7 @@ const corsOptions = {
 ## Data Protection
 
 ### Sensitive Data Handling
+
 - **Encryption at rest** for sensitive database fields
 - **Encryption in transit** with HTTPS
 - **No sensitive data in logs** - sanitize log output
@@ -223,6 +241,7 @@ logger.info('User login attempt', {
 ```
 
 ### Database Security
+
 - **Connection string security** - never log database URLs
 - **Database user permissions** - minimal required access
 - **Connection pooling limits** - prevent connection exhaustion
@@ -231,6 +250,7 @@ logger.info('User login attempt', {
 ## Error Handling Security
 
 ### Information Disclosure Prevention
+
 - **Generic error messages** for external users
 - **Detailed logging** for internal debugging
 - **No stack traces** in production API responses
@@ -241,7 +261,7 @@ logger.info('User login attempt', {
 export class DomainError extends Error {
   abstract readonly httpStatus: number;
   abstract readonly code: string;
-  
+
   toResponse() {
     return {
       error: {
@@ -255,6 +275,7 @@ export class DomainError extends Error {
 ```
 
 ### Graceful Error Handling
+
 - **Fail securely** - errors should not expose system internals
 - **Consistent error timing** - prevent timing attacks
 - **Error recovery** - graceful degradation when possible
@@ -263,6 +284,7 @@ export class DomainError extends Error {
 ## Monitoring & Audit
 
 ### Security Logging
+
 - **Authentication events** - login attempts, failures, successes
 - **Authorization failures** - access attempts to restricted resources
 - **Input validation failures** - potential attack attempts
@@ -282,6 +304,7 @@ export function logSecurityEvent(event: SecurityEvent) {
 ```
 
 ### Monitoring Strategy
+
 - **Failed authentication monitoring** - detect brute force attempts
 - **Unusual access patterns** - detect potential security breaches
 - **Performance anomalies** - detect potential DoS attacks
@@ -290,6 +313,7 @@ export function logSecurityEvent(event: SecurityEvent) {
 ## Security Testing
 
 ### Testing Security Controls
+
 - **Authentication testing** - verify token validation and expiration
 - **Authorization testing** - verify access controls work correctly
 - **Input validation testing** - test boundary conditions and malicious input
@@ -300,12 +324,12 @@ export function logSecurityEvent(event: SecurityEvent) {
 describe('Authentication Security', () => {
   it('should reject expired tokens', async () => {
     const expiredToken = generateExpiredToken();
-    
+
     const response = await request(app)
       .get('/api/protected')
       .set('Authorization', `Bearer ${expiredToken}`)
       .expect(401);
-    
+
     expect(response.body.error.code).toBe('TOKEN_EXPIRED');
     expect(response.body.error.message).not.toContain('internal'); // No sensitive details
   });
@@ -315,6 +339,7 @@ describe('Authentication Security', () => {
 ## Security Checklist
 
 ### Development Phase
+
 - [ ] All environment variables for secrets are required (no fallbacks)
 - [ ] Input validation at all system boundaries
 - [ ] Parameterized database queries only
@@ -324,6 +349,7 @@ describe('Authentication Security', () => {
 - [ ] Error messages don't expose sensitive information
 
 ### Deployment Phase
+
 - [ ] Strong, unique secrets generated for production
 - [ ] Database user has minimal required permissions
 - [ ] CORS policy restricts origins appropriately

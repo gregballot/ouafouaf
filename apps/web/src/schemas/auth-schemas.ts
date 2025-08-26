@@ -39,6 +39,7 @@ export const loginSchema = z.object({
     .string()
     .min(1, 'Password is required')
     .max(128, 'Password is too long'), // Less strict for login
+  remember: z.boolean().optional(),
 });
 
 // Signup form schema

@@ -85,7 +85,14 @@ export const LargePadding: Story = {
 
 export const AllVariants: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', maxWidth: '800px' }}>
+    <div
+      style={{
+        display: 'flex',
+        gap: '1rem',
+        flexWrap: 'wrap',
+        maxWidth: '800px',
+      }}
+    >
       <Card variant="elevated" style={{ width: '200px' }}>
         <h3>Elevated Card</h3>
         <p>This card has a subtle shadow effect.</p>
@@ -111,7 +118,14 @@ export const AllVariants: Story = {
 
 export const AllPaddingSizes: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', maxWidth: '800px' }}>
+    <div
+      style={{
+        display: 'flex',
+        gap: '1rem',
+        flexWrap: 'wrap',
+        maxWidth: '800px',
+      }}
+    >
       <Card variant="elevated" padding="none" style={{ width: '180px' }}>
         <h3>No Padding</h3>
         <p>Content touches the edges.</p>
@@ -145,16 +159,33 @@ export const ComplexContent: Story = {
     padding: 'lg',
     children: (
       <div>
-        <h2 style={{ margin: '0 0 1rem 0', color: '#333' }}>Featured Article</h2>
+        <h2 style={{ margin: '0 0 1rem 0', color: '#333' }}>
+          Featured Article
+        </h2>
         <p style={{ margin: '0 0 1rem 0', lineHeight: '1.6' }}>
-          This card demonstrates how the component handles complex content with multiple elements,
-          including headings, paragraphs, and interactive elements.
+          This card demonstrates how the component handles complex content with
+          multiple elements, including headings, paragraphs, and interactive
+          elements.
         </p>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button style={{ padding: '0.5rem 1rem', border: '1px solid #ccc', borderRadius: '4px', background: 'white' }}>
+          <button
+            style={{
+              padding: '0.5rem 1rem',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              background: 'white',
+            }}
+          >
             Read More
           </button>
-          <button style={{ padding: '0.5rem 1rem', border: '1px solid #ccc', borderRadius: '4px', background: 'white' }}>
+          <button
+            style={{
+              padding: '0.5rem 1rem',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              background: 'white',
+            }}
+          >
             Share
           </button>
         </div>

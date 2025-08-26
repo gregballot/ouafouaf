@@ -103,10 +103,19 @@ export const CurrentColor: Story = {
 
 export const AllSizes: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
+    <div
+      style={{
+        display: 'flex',
+        gap: '2rem',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+      }}
+    >
       <div style={{ textAlign: 'center' }}>
         <LoadingSpinner size="xs" />
-        <div style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>Extra Small</div>
+        <div style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
+          Extra Small
+        </div>
       </div>
       <div style={{ textAlign: 'center' }}>
         <LoadingSpinner size="sm" />
@@ -122,7 +131,9 @@ export const AllSizes: Story = {
       </div>
       <div style={{ textAlign: 'center' }}>
         <LoadingSpinner size="xl" />
-        <div style={{ marginTop: '0.5rem', fontSize: '1.25rem' }}>Extra Large</div>
+        <div style={{ marginTop: '0.5rem', fontSize: '1.25rem' }}>
+          Extra Large
+        </div>
       </div>
     </div>
   ),
@@ -137,7 +148,14 @@ export const AllSizes: Story = {
 
 export const AllColors: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
+    <div
+      style={{
+        display: 'flex',
+        gap: '2rem',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+      }}
+    >
       <div style={{ textAlign: 'center' }}>
         <LoadingSpinner size="lg" color="primary" />
         <div style={{ marginTop: '0.5rem' }}>Primary</div>
@@ -173,7 +191,9 @@ export const CustomLabel: Story = {
 export const InlineUsage: Story = {
   render: () => (
     <div style={{ fontSize: '1.125rem' }}>
-      Processing your request <LoadingSpinner size="sm" color="current" label="Processing" /> please wait...
+      Processing your request{' '}
+      <LoadingSpinner size="sm" color="current" label="Processing" /> please
+      wait...
     </div>
   ),
   parameters: {

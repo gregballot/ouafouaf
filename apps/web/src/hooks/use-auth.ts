@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { apiClient, ApiError } from '../lib/api-client';
 import type { AuthState } from '../lib/auth';
 import type {
@@ -17,10 +17,20 @@ export function useAuth() {
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Initialize authentication state by checking server
   useEffect(() => {
     if (authState.status !== 'initializing') return;
+
+    // Skip auth check if user is on auth page - treat as unauthenticated
+    if (location.pathname === '/auth') {
+      setAuthState({
+        status: 'unauthenticated',
+        user: null,
+      });
+      return;
+    }
 
     const initAuth = async () => {
       try {
@@ -35,7 +45,11 @@ export function useAuth() {
           user,
         });
       } catch (error) {
-        // No valid session - user is unauthenticated
+        // No valid session or API not available - user is unauthenticated
+        console.log(
+          'Auth initialization failed, treating as unauthenticated:',
+          error
+        );
         setAuthState({
           status: 'unauthenticated',
           user: null,
@@ -43,8 +57,23 @@ export function useAuth() {
       }
     };
 
+    // Add a timeout to prevent infinite loading if API is not available
+    const timeoutId = setTimeout(() => {
+      if (authState.status === 'initializing') {
+        console.log(
+          'Auth initialization timed out, treating as unauthenticated'
+        );
+        setAuthState({
+          status: 'unauthenticated',
+          user: null,
+        });
+      }
+    }, 5000); // 5 second timeout
+
     initAuth();
-  }, [authState.status]);
+
+    return () => clearTimeout(timeoutId);
+  }, [authState.status, location.pathname]);
 
   // Note: No cross-tab sync needed - httpOnly cookies are handled server-side
 

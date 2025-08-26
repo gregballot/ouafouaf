@@ -7,13 +7,15 @@ This document outlines the deployment architecture, environment configuration, a
 ### Vercel Deployment Strategy
 
 **Frontend App (apps/web):**
+
 - **Deploy from**: `apps/web` directory
 - **Build command**: `pnpm build` (configured in vercel.json)
 - **Output**: Static site with client-side routing
 - **CDN**: Global edge network for optimal performance
 
 **Backend API (apps/api):**
-- **Deploy from**: `apps/api` directory  
+
+- **Deploy from**: `apps/api` directory
 - **Runtime**: Node.js serverless functions
 - **Build command**: `pnpm build` (TypeScript compilation)
 - **Output**: Compiled JavaScript with optimized dependencies
@@ -21,12 +23,14 @@ This document outlines the deployment architecture, environment configuration, a
 ### Database Infrastructure
 
 **Production Database:**
+
 - **Vercel Postgres**: Managed PostgreSQL with automatic scaling
 - **Connection pooling**: Built-in connection management
 - **Backup strategy**: Automated daily backups with point-in-time recovery
 - **SSL enforcement**: All connections encrypted in transit
 
 **Migration Strategy:**
+
 - **CI/CD migrations**: Use `pnpm db:migrate` in deployment scripts
 - **Version tracking**: Automatic migration state management
 - **Rollback capability**: Database migrations support safe rollbacks
@@ -37,6 +41,7 @@ This document outlines the deployment architecture, environment configuration, a
 ### Required Environment Variables
 
 **Backend API (`apps/api`):**
+
 ```bash
 # Database Configuration
 DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
@@ -51,6 +56,7 @@ API_PORT=4000
 ```
 
 **Frontend App (`apps/web`):**
+
 ```bash
 # API Integration
 VITE_API_URL=https://your-api-domain.vercel.app
@@ -62,6 +68,7 @@ NODE_ENV=production
 ### Environment Variable Security
 
 **Secret Generation:**
+
 ```bash
 # Generate secure JWT secret (256-bit)
 openssl rand -base64 32
@@ -71,6 +78,7 @@ openssl rand -hex 32
 ```
 
 **Security Requirements:**
+
 - **No fallback secrets** - application fails fast without required variables
 - **Environment-specific values** - different secrets for staging/production
 - **Rotate regularly** - implement secret rotation schedule
@@ -81,6 +89,7 @@ openssl rand -hex 32
 ### Vercel Configuration Files
 
 **Frontend (`apps/web/vercel.json`):**
+
 ```json
 {
   "buildCommand": "cd ../.. && npx turbo run build --filter=web",
@@ -116,6 +125,7 @@ openssl rand -hex 32
 ```
 
 **Backend (`apps/api/vercel.json`):**
+
 ```json
 {
   "buildCommand": "cd ../.. && npx turbo run build --filter=api",
@@ -138,11 +148,13 @@ openssl rand -hex 32
 ### Build Optimization
 
 **Turborepo Configuration:**
+
 - **Parallel builds** - frontend and backend build independently
 - **Build caching** - incremental builds with dependency tracking
 - **Output optimization** - only necessary files included in deployments
 
 **Dependencies:**
+
 - **Production dependencies only** - dev dependencies excluded from production builds
 - **Tree shaking** - unused code eliminated during build
 - **Bundle analysis** - monitor bundle sizes for performance
@@ -152,6 +164,7 @@ openssl rand -hex 32
 ### Deployment Workflow
 
 **Automated Deployment:**
+
 1. **Code push** to main branch triggers deployment
 2. **Install dependencies** using pnpm with frozen lockfile
 3. **Type checking** across all packages
@@ -162,6 +175,7 @@ openssl rand -hex 32
 8. **Deployment** to Vercel with health checks
 
 **Environment Promotion:**
+
 ```bash
 # Development → Staging → Production
 git push origin feature/branch  # Deploy to preview
@@ -171,13 +185,14 @@ git push origin main           # Deploy to production
 ### Health Checks
 
 **API Health Endpoint:**
+
 ```typescript
 // Health check endpoint
 app.get('/health', async (request, reply) => {
   try {
     // Test database connection
     await db.selectFrom('users').select('id').limit(1).execute();
-    
+
     return {
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -197,6 +212,7 @@ app.get('/health', async (request, reply) => {
 ```
 
 **Frontend Health Check:**
+
 - **Service worker** registration success
 - **API connectivity** verification
 - **Error boundary** monitoring
@@ -207,6 +223,7 @@ app.get('/health', async (request, reply) => {
 ### Production Security Headers
 
 **Content Security Policy:**
+
 ```typescript
 const cspHeader = [
   "default-src 'self'",
@@ -220,6 +237,7 @@ const cspHeader = [
 ```
 
 **Additional Security Headers:**
+
 - **HSTS**: `Strict-Transport-Security: max-age=31536000; includeSubDomains`
 - **X-Content-Type-Options**: `nosniff`
 - **X-Frame-Options**: `DENY`
@@ -228,6 +246,7 @@ const cspHeader = [
 ### CORS Configuration
 
 **Production CORS Policy:**
+
 ```typescript
 const corsOptions = {
   origin: [
@@ -246,12 +265,14 @@ const corsOptions = {
 ### Application Monitoring
 
 **Error Tracking:**
+
 - **Sentry integration** for error monitoring and alerting
 - **Performance monitoring** for API response times
 - **User session tracking** for frontend error analysis
 - **Custom error boundaries** for graceful error handling
 
 **Performance Monitoring:**
+
 - **Core Web Vitals** tracking for frontend performance
 - **API response time** monitoring and alerting
 - **Database query performance** analysis
@@ -260,6 +281,7 @@ const corsOptions = {
 ### Logging Strategy
 
 **Structured Logging:**
+
 ```typescript
 // Production logging format
 logger.info('User authentication', {
@@ -272,6 +294,7 @@ logger.info('User authentication', {
 ```
 
 **Log Levels:**
+
 - **ERROR**: Application errors requiring immediate attention
 - **WARN**: Potential issues that should be monitored
 - **INFO**: Important application events and user actions
@@ -280,12 +303,14 @@ logger.info('User authentication', {
 ### Alerting Configuration
 
 **Critical Alerts:**
+
 - **Database connection failures**
 - **Authentication system errors**
 - **High error rates** (>5% of requests)
 - **Performance degradation** (>2s response times)
 
 **Warning Alerts:**
+
 - **Unusual traffic patterns**
 - **Increased error rates** (>1% of requests)
 - **Slow database queries** (>1s execution time)
@@ -296,12 +321,14 @@ logger.info('User authentication', {
 ### Database Backup Strategy
 
 **Automated Backups:**
+
 - **Daily full backups** with 30-day retention
 - **Point-in-time recovery** for the last 7 days
 - **Cross-region replication** for disaster recovery
 - **Backup testing** - monthly restore verification
 
 **Recovery Procedures:**
+
 1. **Point-in-time recovery** for recent data corruption
 2. **Full database restore** from daily backups
 3. **Migration rollback** for schema-related issues
@@ -310,6 +337,7 @@ logger.info('User authentication', {
 ### Application Recovery
 
 **Rollback Strategy:**
+
 - **Vercel deployment rollback** to previous stable version
 - **Database migration rollback** using down migrations
 - **Feature flags** for quick feature disable
@@ -320,12 +348,14 @@ logger.info('User authentication', {
 ### Frontend Optimization
 
 **Build Optimization:**
+
 - **Code splitting** by route and feature
 - **Tree shaking** to eliminate unused code
 - **Asset optimization** with automatic compression
 - **CDN caching** for static assets
 
 **Runtime Optimization:**
+
 - **Service worker** for offline capability
 - **Resource prefetching** for critical routes
 - **Image optimization** with responsive images
@@ -334,12 +364,14 @@ logger.info('User authentication', {
 ### Backend Optimization
 
 **Database Optimization:**
+
 - **Connection pooling** for efficient resource usage
 - **Query optimization** with proper indexing
 - **Connection limits** to prevent resource exhaustion
 - **Query timeout** configuration for reliability
 
 **API Optimization:**
+
 - **Response caching** for frequently accessed data
 - **Compression** for large API responses
 - **Rate limiting** to prevent abuse

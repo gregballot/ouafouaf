@@ -76,7 +76,8 @@ export const WithTitle: Story = {
   args: {
     variant: 'info',
     title: 'Important Notice',
-    children: 'This alert has a title and provides additional context for the user.',
+    children:
+      'This alert has a title and provides additional context for the user.',
   },
 };
 
@@ -91,7 +92,14 @@ export const WithCloseButton: Story = {
 
 export const AllVariants: Story = {
   render: () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '500px' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        maxWidth: '500px',
+      }}
+    >
       <Alert variant="info" title="Information">
         This is an informational alert with a title.
       </Alert>
@@ -119,6 +127,7 @@ export const LongContent: Story = {
   args: {
     variant: 'info',
     title: 'Detailed Information',
-    children: 'This is a longer alert message that demonstrates how the component handles extended content. The alert will expand to accommodate the text while maintaining proper spacing and readability.',
+    children:
+      'This is a longer alert message that demonstrates how the component handles extended content. The alert will expand to accommodate the text while maintaining proper spacing and readability.',
   },
 };

@@ -12,12 +12,17 @@ export {
 export {
   SignupRequest,
   LoginRequest,
+  ForgotPasswordRequest,
   AuthResponse,
+  ForgotPasswordResponse,
   AuthErrorResponse,
   SignupRouteSchema,
   LoginRouteSchema,
+  ForgotPasswordRouteSchema,
   type SignupRequestType,
   type LoginRequestType,
+  type ForgotPasswordRequestType,
   type AuthResponseType,
+  type ForgotPasswordResponseType,
   type AuthErrorResponseType,
 } from './auth';

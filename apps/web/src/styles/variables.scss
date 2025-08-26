@@ -111,10 +111,18 @@ $radius-full: 9999px;
 
 // Shadow Variables
 $shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-$shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-$shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-$shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-$shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+$shadow-base:
+  0 1px 3px 0 rgb(0 0 0 / 0.1),
+  0 1px 2px -1px rgb(0 0 0 / 0.1);
+$shadow-md:
+  0 4px 6px -1px rgb(0 0 0 / 0.1),
+  0 2px 4px -2px rgb(0 0 0 / 0.1);
+$shadow-lg:
+  0 10px 15px -3px rgb(0 0 0 / 0.1),
+  0 4px 6px -4px rgb(0 0 0 / 0.1);
+$shadow-xl:
+  0 20px 25px -5px rgb(0 0 0 / 0.1),
+  0 8px 10px -6px rgb(0 0 0 / 0.1);
 $shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
 $shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
 $shadow-none: 0 0 #0000;
@@ -129,7 +137,7 @@ $shadow-none: 0 0 #0000;
   font-weight: 500;
   text-decoration: none;
   transition: all 0.2s ease-in-out;
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -158,14 +166,16 @@ $shadow-none: 0 0 #0000;
   border-radius: $radius-md;
   padding: $spacing-3 $spacing-4;
   font-size: 1rem;
-  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  
+  transition:
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+
   &:focus {
     outline: none;
     border-color: $color-primary-500;
     box-shadow: 0 0 0 3px rgba($color-primary-500, 0.1);
   }
-  
+
   &:disabled {
     background-color: $color-neutral-100;
     cursor: not-allowed;

@@ -3,14 +3,20 @@ import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import {
   SignupRouteSchema,
   LoginRouteSchema,
+  ForgotPasswordRouteSchema,
   type SignupRequestType,
   type LoginRequestType,
+  type ForgotPasswordRequestType,
 } from '@repo/api-schemas';
 import { UserRepository } from '../domain/User/UserRepository';
 import { EventRepository } from '../domain/DomainEvent/EventRepository';
 import { registerUser } from '../domain/User/features/register-user';
 import { authenticateUser } from '../domain/User/features/authenticate-user';
-import { generateToken, getTokenExpiration } from '../lib/auth';
+import {
+  generateToken,
+  getTokenExpiration,
+  getCookieMaxAge,
+} from '../lib/auth';
 import { withTransaction } from '../shared/transaction';
 import { InvalidCredentialsError } from '../shared/errors';
 
@@ -66,7 +72,11 @@ export async function authRoutes(fastify: FastifyInstance) {
       schema: LoginRouteSchema,
     },
     async (request, reply) => {
-      const { email, password } = request.body as LoginRequestType;
+      const {
+        email,
+        password,
+        remember = false,
+      } = request.body as LoginRequestType;
 
       if (!password || typeof password !== 'string') {
         throw new InvalidCredentialsError();
@@ -84,23 +94,47 @@ export async function authRoutes(fastify: FastifyInstance) {
         );
       });
 
-      // Generate JWT token
+      // Generate JWT token with appropriate expiration based on remember flag
       const userDetails = result.user.details;
-      const token = generateToken(userDetails);
-      const expires_at = getTokenExpiration();
+      const token = generateToken(userDetails, remember);
+      const expires_at = getTokenExpiration(remember);
 
-      // Set httpOnly cookie for token
+      // Set httpOnly cookie for token with appropriate maxAge
       reply.setCookie('authToken', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 3600000, // 1 hour in milliseconds
+        maxAge: getCookieMaxAge(remember),
         path: '/',
       });
 
       return reply.status(200).send({
         user: userDetails,
         expires_at,
+      });
+    }
+  );
+
+  // Forgot password endpoint (dummy implementation)
+  server.post(
+    '/forgot-password',
+    {
+      schema: ForgotPasswordRouteSchema,
+    },
+    async (request, reply) => {
+      const { email } = request.body as ForgotPasswordRequestType;
+
+      // TODO: In a real implementation, you would:
+      // 1. Check if user exists with this email
+      // 2. Generate a secure reset token
+      // 3. Store the token with expiration
+      // 4. Send email with reset link
+      //
+      // For now, we just simulate success after a brief delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      return reply.status(200).send({
+        message: `If an account with ${email} exists, a password reset link has been sent.`,
       });
     }
   );

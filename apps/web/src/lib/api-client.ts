@@ -1,7 +1,9 @@
 import type {
   SignupRequestType,
   LoginRequestType,
+  ForgotPasswordRequestType,
   AuthResponseType,
+  ForgotPasswordResponseType,
   AuthErrorResponseType,
 } from '@repo/api-schemas';
 
@@ -139,6 +141,18 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  }
+
+  async forgotPassword(
+    data: ForgotPasswordRequestType
+  ): Promise<ForgotPasswordResponseType> {
+    return this.request<ForgotPasswordResponseType>(
+      '/api/auth/forgot-password',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
   }
 
   // Generic GET method

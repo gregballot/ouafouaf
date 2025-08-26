@@ -14,6 +14,7 @@ We follow a **pragmatic testing strategy** that emphasizes real integration over
 - **Test meaningful behaviors** - focus on business value, not implementation details
 
 ### Quality Over Quantity
+
 - **Test the right things** - focus on business logic, edge cases, and integration points
 - **Avoid testing frameworks** - don't test what React, Fastify, or Kysely already test
 - **End-to-end user flows** - verify complete features work together
@@ -130,18 +131,21 @@ describe('Authenticate User Feature - Integration Tests', () => {
 ### Key Testing Patterns
 
 **Test Setup:**
+
 - **`beforeEach` setup** - Create fresh test data for each test using `withTransaction()`
 - **Multiple transaction contexts** - Separate transactions for setup, execution, and verification
 - **Shared test variables** - Declare at describe block level for consistency
 - **Builder pattern** - Use entity builders for consistent test data creation
 
 **Test Execution:**
+
 - **Complete workflow testing** - Test the entire feature flow from input to database state
 - **Real database operations** - No mocks for repositories or database calls
 - **Transaction isolation** - Each test gets its own transaction context
 - **Error scenario testing** - Test both success and failure paths
 
 **Test Verification:**
+
 - **Domain event verification** - Verify that domain events are properly published
 - **Database state verification** - Check that expected changes occurred
 - **Business rule verification** - Assert on business logic outcomes
@@ -159,9 +163,9 @@ describe('User Entity', () => {
     it('should create user with valid data', async () => {
       const email = Email.create('test@example.com');
       const password = await Password.create('validpassword123');
-      
+
       const user = await User.create({ email, password });
-      
+
       expect(user.id).toBeDefined();
       expect(user.email.toString()).toBe('test@example.com');
       expect(user.createdAt).toBeInstanceOf(Date);
@@ -178,9 +182,9 @@ describe('User Entity', () => {
     it('should update last login timestamp', async () => {
       const user = await new UserBuilder().build();
       const originalLastLogin = user.lastLogin;
-      
+
       const updatedUser = user.updateLastLogin();
-      
+
       expect(updatedUser.lastLogin).toBeInstanceOf(Date);
       expect(updatedUser.lastLogin).not.toBe(originalLastLogin);
     });
@@ -191,9 +195,9 @@ describe('User Entity', () => {
       const user = await new UserBuilder()
         .withEmail('test@example.com')
         .build();
-      
+
       const state = user.getInternalState();
-      
+
       expect(state).toMatchObject({
         id: expect.any(String),
         email: 'test@example.com',
@@ -215,10 +219,10 @@ describe('Email Value Object', () => {
     const validEmails = [
       'user@example.com',
       'test.email+tag@domain.co.uk',
-      'user123@subdomain.example.org'
+      'user123@subdomain.example.org',
     ];
-    
-    validEmails.forEach(email => {
+
+    validEmails.forEach((email) => {
       expect(() => Email.create(email)).not.toThrow();
     });
   });
@@ -228,10 +232,10 @@ describe('Email Value Object', () => {
       'not-an-email',
       '@example.com',
       'user@',
-      'user..double.dot@example.com'
+      'user..double.dot@example.com',
     ];
-    
-    invalidEmails.forEach(email => {
+
+    invalidEmails.forEach((email) => {
       expect(() => Email.create(email)).toThrow('Invalid email format');
     });
   });
@@ -273,7 +277,7 @@ export class UserBuilder {
   async build(): Promise<User> {
     const emailVO = Email.create(this.email);
     const passwordVO = await Password.create(this.password);
-    
+
     return await User.create({
       email: emailVO,
       password: passwordVO,
@@ -308,12 +312,14 @@ const users = await Promise.all([
 ### Test Organization
 
 **File Structure:**
+
 - **Co-locate tests** with implementation files (`.test.ts` suffix)
 - **Feature integration tests** in the features directory
 - **Entity unit tests** alongside entity files
 - **Shared test utilities** in dedicated test-utils directory
 
 **Test Naming:**
+
 ```typescript
 // ✅ Good - Describes behavior being tested
 describe('User Registration Feature', () => {
@@ -331,12 +337,14 @@ describe('UserRepository.save()', () => {
 ### Test Data Management
 
 **Clean Slate Principle:**
+
 - Each test starts with a completely empty database
 - Tests create their own test data using builders
 - No shared state between tests
 - Predictable, isolated test execution
 
 **Builder Consistency:**
+
 - Use builders for all entity creation in tests
 - Provide sensible defaults for quick test setup
 - Allow customization for specific test scenarios
@@ -345,6 +353,7 @@ describe('UserRepository.save()', () => {
 ### Error Testing
 
 **Comprehensive Error Coverage:**
+
 ```typescript
 describe('Error Scenarios', () => {
   it('should throw ValidationError for invalid input', async () => {
@@ -356,7 +365,7 @@ describe('Error Scenarios', () => {
   it('should throw UserAlreadyExistsError for duplicate email', async () => {
     // Setup: Create existing user
     await new UserBuilder().withEmail('test@example.com').build();
-    
+
     // Test: Attempt to create duplicate
     await expect(
       createUser({ email: 'test@example.com', password: 'password123' })
@@ -368,12 +377,14 @@ describe('Error Scenarios', () => {
 ### Performance Testing
 
 **Database Performance:**
+
 - Test queries with realistic data volumes
 - Verify database indexes are effective
 - Test transaction rollback scenarios
 - Monitor test execution times
 
 **Integration Performance:**
+
 - Test API endpoints with various payload sizes
 - Verify reasonable response times
 - Test concurrent request handling
@@ -384,6 +395,7 @@ describe('Error Scenarios', () => {
 ### Continuous Integration
 
 **Required Checks:**
+
 ```bash
 # Type safety verification
 pnpm type-check
@@ -399,6 +411,7 @@ pnpm build
 ```
 
 **Test Coverage Goals:**
+
 - **Business logic**: 100% coverage of domain entities and features
 - **Integration paths**: All API endpoints and database operations
 - **Error scenarios**: All custom error types and edge cases
@@ -407,12 +420,14 @@ pnpm build
 ### Test Maintenance
 
 **Regular Reviews:**
+
 - Remove tests that no longer provide value
 - Update tests when business requirements change
 - Refactor tests to maintain clarity and speed
 - Monitor and optimize slow tests
 
 **Documentation Updates:**
+
 - Keep test documentation current with implementation
 - Document testing patterns and conventions
 - Maintain examples of good test structure

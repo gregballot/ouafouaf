@@ -24,12 +24,25 @@ export const LoginRequest = Type.Object({
     minLength: 8,
     maxLength: 100,
   }),
+  remember: Type.Optional(Type.Boolean()),
+});
+
+export const ForgotPasswordRequest = Type.Object({
+  email: Type.String({
+    format: 'email',
+    minLength: 1,
+    maxLength: 255,
+  }),
 });
 
 // Auth response schemas
 export const AuthResponse = Type.Object({
   user: User,
   expires_at: Type.String({ format: 'date-time' }),
+});
+
+export const ForgotPasswordResponse = Type.Object({
+  message: Type.String(),
 });
 
 // Auth error responses
@@ -80,8 +93,18 @@ export const LoginRouteSchema = {
   },
 };
 
+export const ForgotPasswordRouteSchema = {
+  body: ForgotPasswordRequest,
+  response: {
+    200: ForgotPasswordResponse,
+    400: AuthErrorResponse,
+  },
+};
+
 // Type exports
 export type SignupRequestType = Static<typeof SignupRequest>;
 export type LoginRequestType = Static<typeof LoginRequest>;
+export type ForgotPasswordRequestType = Static<typeof ForgotPasswordRequest>;
 export type AuthResponseType = Static<typeof AuthResponse>;
+export type ForgotPasswordResponseType = Static<typeof ForgotPasswordResponse>;
 export type AuthErrorResponseType = Static<typeof AuthErrorResponse>;

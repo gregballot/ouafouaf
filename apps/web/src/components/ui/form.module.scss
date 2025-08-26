@@ -22,7 +22,7 @@
 
 .formInputError {
   border-color: $color-error-600;
-  
+
   &:focus {
     border-color: $color-error-600;
     box-shadow: 0 0 0 3px rgba($color-error-600, 0.1);
